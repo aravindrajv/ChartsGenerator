@@ -10,6 +10,7 @@
     <link href="Content/bootstrap.css" rel="stylesheet" />
     <link href="Content/font-awesome.css" rel="stylesheet" />
     <link href="Content/site.css" rel="stylesheet" />
+    <%--<script type="text/javascript" src="https://www.google.com/jsapi"></script>--%>
     <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
     <style>
         .charts {
@@ -121,14 +122,9 @@
         </div>
 
         <div>
-          <%--  <div class="row">
-                <form runat="server">
-                    <asp:FileUpload ID="FileExcel" type="file" runat="server" />
-                    <input type="button" id="UploadBtn" onclick="onLoad();" value="Submit"/>
-                </form>
-            </div>--%>
             <div id="Charts"></div>
         </div>
+        <a href="Home.aspx">Back</a>
     </div>
 </body>
 </html>
