@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Dashboard</title>
+    <title>Home</title>
     <script src="Scripts/jquery-2.2.0.min.js"></script>
     <script src="Scripts/bootstrap.js"></script>
     <link href="Content/bootstrap.css" rel="stylesheet" />

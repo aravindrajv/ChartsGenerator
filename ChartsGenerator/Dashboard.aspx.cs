@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.OleDb;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Web;
@@ -21,7 +23,11 @@ namespace ChartsGenerator
         {
             if (!IsPostBack)
             {
-                //DataTable cData = ConvertExcelToDataTable("C:/Users/Deepak 1/Downloads/TimelineChart.xlsx");
+                if (Session["FPath"] == null)
+                {
+                    Response.Redirect("Home.aspx");
+                }
+                ImportToGrid();
             }
         }
 
@@ -29,7 +35,8 @@ namespace ChartsGenerator
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetProjectCount()
         {
-            var filepath = HostingEnvironment.MapPath("~/input/template.xlsx");
+            //var filepath = HostingEnvironment.MapPath("~/input/template.xlsx");
+            var filepath = HttpContext.Current.Session["FPath"].ToString();
             var cData = ConvertExcelToDataTable(filepath);
             var pData = cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
             return pData;
@@ -39,7 +46,8 @@ namespace ChartsGenerator
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object[] GetChartData(string name)
         {
-            var filepath = HostingEnvironment.MapPath("~/input/template.xlsx");
+            //var filepath = HostingEnvironment.MapPath("~/input/template.xlsx");
+            var filepath = HttpContext.Current.Session["FPath"].ToString();
             DataTable cData = ConvertExcelToDataTable(filepath);
             var data = new List<ChartData>();
             data = new List<ChartData>();
@@ -121,9 +129,43 @@ namespace ChartsGenerator
             }
         }
 
-        protected void UploadBtn_Click(object sender, EventArgs e)
+  
+        public void ImportToGrid()
         {
+            var connString = "";
+            //var path = HostingEnvironment.MapPath("~/input/template.xlsx");
+            var path = HttpContext.Current.Session["FPath"].ToString();
+            const string strFileType = ".xlsx";
+            //Connection String to Excel Workbook
+            if (strFileType.Trim() == ".xls")
+            {
+                connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+            }
+            else if (strFileType.Trim() == ".xlsx")
+            {
+                //connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
+                connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';";
+            }
+            const string query = "SELECT [Project], [Phase], [Task], [Duration], [StartDate], [EndDate]  FROM [Sheet1$]";
+            var conn = new OleDbConnection(connString);
+            if (conn.State == ConnectionState.Closed)
+                conn.Open();
+            var cmd = new OleDbCommand(query, conn);
+            var da = new OleDbDataAdapter(cmd);
+            var ds = new DataSet();
+            da.Fill(ds);
+            grvExcelData.DataSource = ds.Tables[0];
+            grvExcelData.DataBind();
+            da.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
 
+        protected void PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            ImportToGrid();
+            grvExcelData.PageIndex = e.NewPageIndex;
+            grvExcelData.DataBind();
         }
     }
 }

@@ -20,7 +20,7 @@
     </style>
     <script type="text/javascript">
         function onLoad() {
-            var pData= "";
+            var pData = "";
             $.ajax({
                 url: "Dashboard.aspx/GetProjectCount",
                 data: "",
@@ -119,6 +119,13 @@
             <div>
                 &nbsp;Dashboard
             </div>
+        </div>
+        <div >
+            <form runat="server">
+                <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging = "PageIndexChanging" AllowPaging = "true" Width="100%" style="text-align: left; border-color: gray;" >
+                    <HeaderStyle  BackColor="#158CBA" Font-Bold="true" ForeColor="White"  />
+                </asp:GridView>
+            </form>
         </div>
 
         <div>
