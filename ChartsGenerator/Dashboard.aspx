@@ -10,6 +10,8 @@
     <link href="Content/bootstrap.css" rel="stylesheet" />
     <link href="Content/font-awesome.css" rel="stylesheet" />
     <link href="Content/site.css" rel="stylesheet" />
+    <link href="Content/bootstrap-datepicker.css" rel="stylesheet" />
+    <script src="Scripts/bootstrap-datepicker.js"></script>
     <%--<script type="text/javascript" src="https://www.google.com/jsapi"></script>--%>
     <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
     <style>
@@ -17,20 +19,37 @@
             overflow-y: hidden;
             /*min-height: 400px;*/
         }
+
+        .FilterTable td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 2px;
+            width: 100px;
+            
+        }
     </style>
     <script type="text/javascript">
         function onLoad() {
+            $("#Charts").html('');
+            var sDate = $('#strtDate').val();
+            var eDate = $('#endDate').val();
+
+            if (sDate.empty || eDate.empty) {
+                sDate = "";
+                eDate = "";
+            }
+
             var pData = "";
             $.ajax({
                 url: "Dashboard.aspx/GetProjectCount",
-                data: "",
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     pData = json.d;
                     jQuery.each(pData, function (i, val) {
-                        CreateChart(val);
+                        CreateChart(val, sDate, eDate);
                     });
                 },
                 error: function () {
@@ -41,12 +60,12 @@
             });
         }
 
-        function CreateChart(val) {
+        function CreateChart(val, sDate, eDate) {
             var cData;
             $.ajax({
                 url: "Dashboard.aspx/GetChartData",
                 //data: "",
-                data: '{"name":"' + val + '"}',
+                data: '{"name":"' + val + '", "s_Date":"' + sDate + '", "e_Date":"' + eDate + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
@@ -112,26 +131,74 @@
         });
 
     </script>
+    
+    <%--Filter--%>
+    <script>
+        $(document).ready(function () {
+            var nowTemp = new Date();
+            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+            var checkout = $('#strtDate').datepicker({
+                onRender: function (date) {
+                    return date.valueOf() > now.valueOf() ? 'disabled' : '';
+                }
+            }).on('changeDate', function (ev) {
+                checkout.hide();
+            }).data('datepicker');
+
+            checkout = $('#endDate').datepicker({
+                onRender: function (date) {
+                    return date.valueOf() > now.valueOf() ? 'disabled' : '';
+                }
+            }).on('changeDate', function (ev) {
+                checkout.hide();
+            }).data('datepicker');
+        });
+
+ 
+</script>
 </head>
 <body>
+    <form runat="server">
     <div class="container ">
         <div class="navbar navbar-default" style="text-align: center;">
             <div>
                 &nbsp;Dashboard
             </div>
         </div>
-        <div >
-            <form runat="server">
-                <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging = "PageIndexChanging" AllowPaging = "true" Width="100%" style="text-align: left; border-color: gray;" >
-                    <HeaderStyle  BackColor="#158CBA" Font-Bold="true" ForeColor="White"  />
-                </asp:GridView>
-            </form>
-        </div>
-
         <div>
+            <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging="PageIndexChanging" AllowPaging="true" Width="100%" Style="text-align: left; border-color: gray;">
+                    <HeaderStyle BackColor="#158CBA" Font-Bold="true" ForeColor="White" />
+                </asp:GridView>
+            </div>
+        <br/>
+        <div >
+                <table class="FilterTable"  >
+                <tr>
+                    <td>
+                        <span style="font-weight: bold;">Start Date :</span>
+                    </td>
+                    <td>
+                        <input id="strtDate" type="text" class="datepicker form-control" />
+                    </td>
+                    <td>
+                        <span style="font-weight: bold;">End Date : </span>
+                    </td>
+                    <td>
+                        <input id="endDate" type="text" class="datepicker form-control"  /> 
+                    </td>
+                    <td >
+                        <input id="BtnSubmit" type="button" class="btn-primary" value="CreateChart" onclick="onLoad();"/>
+                    </td>
+                </tr>
+               
+            </table>
+            </div>
+
+     <div>
             <div id="Charts"></div>
         </div>
         <a href="Home.aspx">Back</a>
     </div>
+        </form>
 </body>
 </html>

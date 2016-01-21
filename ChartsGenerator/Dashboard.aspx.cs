@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.OleDb;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Web;
-using System.Web.Hosting;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.Script.Services;
 using System.Web.Services;
@@ -19,6 +14,7 @@ namespace ChartsGenerator
 {
     public partial class Dashboard : System.Web.UI.Page
     {
+        private static DataTable _cData;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -27,39 +23,61 @@ namespace ChartsGenerator
                 {
                     Response.Redirect("Home.aspx");
                 }
-                ImportToGrid();
+                else
+                {
+                    var filepath = HttpContext.Current.Session["FPath"].ToString();
+                    _cData = ConvertExcelToDataTable(filepath);
+                    ImportToGrid();
+                }
+
             }
         }
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object GetProjectCount()
+        public static object GetProjectCount(string sDate, string eDate)
         {
-            //var filepath = HostingEnvironment.MapPath("~/input/template.xlsx");
-            var filepath = HttpContext.Current.Session["FPath"].ToString();
-            var cData = ConvertExcelToDataTable(filepath);
-            var pData = cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+            if (string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
+                return _cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+
+            var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+            var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+
+            var tempData = _cData.Clone();
+            foreach (DataRow row in _cData.Rows)
+            {
+                var startDateStr = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
+                if (string.IsNullOrWhiteSpace(startDateStr.ToString()))
+                    continue;
+                var stDate = DateTime.Parse(startDateStr.ToString().Trim());
+                
+                var endDateStr = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
+                if (string.IsNullOrWhiteSpace(endDateStr.ToString().Trim()))
+                    continue;
+
+                var edDate = DateTime.Parse(endDateStr.ToString().Trim());
+
+                if (stDate >= startDate && edDate <= endDate)
+                    tempData.ImportRow(row);
+            }
+
+            var pData = tempData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+
+
             return pData;
         }
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object[] GetChartData(string name)
+        public static object[] GetChartData(string name, string s_Date, string e_Date)
         {
-            //var filepath = HostingEnvironment.MapPath("~/input/template.xlsx");
-            var filepath = HttpContext.Current.Session["FPath"].ToString();
-            DataTable cData = ConvertExcelToDataTable(filepath);
             var data = new List<ChartData>();
-            data = new List<ChartData>();
-            foreach (DataRow row in cData.Rows)
+            foreach (DataRow row in _cData.Rows)
             {
                 var startDate = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
-                if (string.IsNullOrWhiteSpace(startDate.ToString().Trim()))
+                if (string.IsNullOrWhiteSpace(startDate.ToString()))
                     continue;
                 var stDate = DateTime.Parse(startDate.ToString().Trim());
-
-                if (string.IsNullOrWhiteSpace(startDate.ToString().Trim()))
-                    continue;
 
                 var endDate = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
                 if (string.IsNullOrWhiteSpace(endDate.ToString().Trim()))
@@ -78,22 +96,33 @@ namespace ChartsGenerator
             }
 
             var newdata = data.Where(x => x.Project == name).ToList();
+
             
-            var chartData = new object[newdata.Count + 1];
-                chartData[0] = new object[]{
+            int j = 0;
+
+            List<ChartData> tempData;
+            if (string.IsNullOrWhiteSpace(s_Date) || string.IsNullOrWhiteSpace(e_Date))
+                tempData = newdata;
+            else
+            {
+                var start_Date = DateTime.ParseExact(s_Date, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                var end_Date = DateTime.ParseExact(e_Date, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+
+                tempData = newdata.Where(i => i.StartDate >= start_Date && i.EndDate <= end_Date).ToList();
+            }
+            var chartData = new object[tempData.Count + 1];
+            chartData[0] = new object[]{
                 "Project",    
                 "Phase",
                 "Task",
                 "StartDate",
                 "EndDate"
                 };
-            int j = 0;
-            foreach (var i in newdata)
+            foreach (var i in tempData)
             {
                 j++;
                 chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate };
             }
-
             return chartData;
         }
 
@@ -129,7 +158,7 @@ namespace ChartsGenerator
             }
         }
 
-  
+
         public void ImportToGrid()
         {
             var connString = "";
