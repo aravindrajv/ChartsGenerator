@@ -165,12 +165,12 @@
                 &nbsp;Dashboard
             </div>
         </div>
-        <div>
+        <%--<div>
             <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging="PageIndexChanging" AllowPaging="true" Width="100%" Style="text-align: left; border-color: gray;">
                     <HeaderStyle BackColor="#158CBA" Font-Bold="true" ForeColor="White" />
                 </asp:GridView>
             </div>
-        <br/>
+        <br/>--%>
         <div >
                 <table class="FilterTable"  >
                 <tr>

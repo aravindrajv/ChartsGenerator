@@ -47,7 +47,7 @@
                             Display="Dynamic" />
                     </td>
                     <td>
-                        <asp:Button ID="UploadBtn" runat="server" Text="Button" OnClick="UploadBtn_Click" />
+                        <asp:Button ID="UploadBtn" runat="server" Text="Upload" OnClick="UploadBtn_Click" />
                     </td>
                 </tr>
             </table>
