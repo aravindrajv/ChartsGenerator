@@ -27,6 +27,12 @@ namespace ChartsGenerator
                 {
                     var filepath = HttpContext.Current.Session["FPath"].ToString();
                     _cData = ConvertExcelToDataTable(filepath);
+                    var projects = _cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+                    foreach (var project in projects)
+                    {
+                        ddlFleet.Items.Add(new ListItem(project));
+                    }
+                    
                     ImportToGrid();
                 }
 
@@ -35,7 +41,7 @@ namespace ChartsGenerator
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object GetProjectCount(string sDate, string eDate)
+        public static object GetProjectCount(string sDate, string eDate, string fleet, string phase)
         {
             if (string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
                 return _cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
@@ -149,6 +155,18 @@ namespace ChartsGenerator
                 chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate };
             }
             return chartData;
+        }
+
+        protected void FleetSelected(object sender, EventArgs e)
+        {
+            ddlPhase.Items.Clear();
+            ddlPhase.Items.Add("Select");
+            if (ddlPhase.SelectedValue == "-1") return;
+
+            foreach (var reason in DictReasons[ddlExitType.SelectedValue])
+            {
+                ddlPhase.Items.Add(reason);
+            }
         }
 
         public static DataTable ConvertExcelToDataTable(string fileName)

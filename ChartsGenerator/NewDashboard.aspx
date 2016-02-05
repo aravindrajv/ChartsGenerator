@@ -32,7 +32,8 @@
             $("#Charts").html('');
             var sDate = $('#strtDate').val();
             var eDate = $('#endDate').val();
-
+            var fleet = '';
+            var phase = '';
             if (sDate.empty || eDate.empty) {
                 sDate = "";
                 eDate = "";
@@ -41,13 +42,13 @@
             var pData = "";
             $.ajax({
                 url: "NewDashboard.aspx/GetProjectCount",
-                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '"}',
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     pData = json.d;
-                    CreateChart("chart", sDate, eDate);
+                    CreateChart("chart", sDate, eDate, phase,fleet);
 
                 },
                 error: function () {
@@ -58,12 +59,12 @@
             });
         }
 
-        function CreateChart(val, sDate, eDate) {
+        function CreateChart(val, sDate, eDate, phase, fleet) {
             var cData;
             $.ajax({
                 url: "NewDashboard.aspx/GetChartData",
                 //data: "",
-                data: '{"name":"' + val + '", "s_Date":"' + sDate + '", "e_Date":"' + eDate + '"}',
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
@@ -89,8 +90,17 @@
             var options = {
                 title: divName,
                 curveType: 'function',
-                legend: { position: 'bottom' },
-                height:800
+                //'legend': 'left',
+                legend: {
+                    position: 'left',
+                    labeledValueText: 'both',
+                    textStyle: {
+                        color: 'blue',
+                        fontSize: 14
+                    }
+                },
+                height: 800,
+                colors: ['#aa0000', '#00aa00', '#0000aa', '#aaaaaa', '#ffff20'],
             };
 
             var container = document.getElementById(divName);
@@ -187,6 +197,22 @@
                             <input id="endDate" type="text" class="datepicker form-control" />
                         </td>
                         <td>
+                            <span style="font-weight: bold;">Fleet : </span>
+                        </td>
+                        <td>
+                            <asp:DropDownList ID="ddlFleet" runat="server" AutoPostBack="True">
+                                <asp:ListItem Selected="True" Text="--SELECT--" Value="--SELECT--" />
+                            </asp:DropDownList>
+                        </td>
+                        <td>
+                            <span style="font-weight: bold;">Phase : </span>
+                        </td>
+                        <td>
+                            <asp:DropDownList ID="ddlPhase" runat="server">
+                                <asp:ListItem Selected="True" Text="--SELECT--" Value="--SELECT--" />
+                            </asp:DropDownList>
+                        </td>
+                        <td>
                             <input id="BtnSubmit" type="button" class="btn-primary" value="CreateChart" onclick="onLoad();" />
                         </td>
                     </tr>
@@ -197,7 +223,7 @@
             <div>
                 <div id="Charts"></div>
             </div>
-            
+
         </div>
     </form>
 </body>
