@@ -15,6 +15,8 @@ namespace ChartsGenerator
     public partial class NewDashboard : System.Web.UI.Page
     {
         private static DataTable _cData;
+        private static List<ChartData> _chartData;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -27,12 +29,40 @@ namespace ChartsGenerator
                 {
                     var filepath = HttpContext.Current.Session["FPath"].ToString();
                     _cData = ConvertExcelToDataTable(filepath);
-                    var projects = _cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+                    _chartData = new List<ChartData>();
+                    foreach (DataRow row in _cData.Rows)
+                    {
+                        var startDate = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
+                        if (string.IsNullOrWhiteSpace(startDate.ToString()))
+                            continue;
+                        var stDate = DateTime.Parse(startDate.ToString().Trim());
+
+                        var endDate = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
+                        if (string.IsNullOrWhiteSpace(endDate.ToString().Trim()))
+                            continue;
+
+                        var eDate = DateTime.Parse(endDate.ToString().Trim());
+
+                        _chartData.Add(new ChartData
+                        {
+                            Project = row["Project"].ToString(),
+                            Phase = row["Phase"].ToString(),
+                            Task = row["Task"].ToString(),
+                            //Task = "",
+                            StartDate = stDate,
+                            EndDate = eDate,
+                            Fleet = row["Fleet"].ToString(),
+                            Color = row["Color"].ToString(),
+                        });
+                    }
+                    ddlFleet.Items.Add(new ListItem("--SELECT--"));
+                    ddlPhase.Items.Add("--SELECT--");
+                    var projects = _chartData.Select(x => x.Project).Distinct();
                     foreach (var project in projects)
                     {
                         ddlFleet.Items.Add(new ListItem(project));
                     }
-                    
+
                     ImportToGrid();
                 }
 
@@ -43,101 +73,82 @@ namespace ChartsGenerator
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetProjectCount(string sDate, string eDate, string fleet, string phase)
         {
-            if (string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
-                return _cData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+            if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
+                && fleet == "--SELECT--" && phase == "--SELECT--")
+                return _chartData.Select(x => x.Project).Distinct();
 
-            var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
-            var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+            var tempData = _chartData;
 
-            var tempData = _cData.Clone();
-            foreach (DataRow row in _cData.Rows)
+            if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
             {
-                var startDateStr = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
-                if (string.IsNullOrWhiteSpace(startDateStr.ToString()))
-                    continue;
-                var stDate = DateTime.Parse(startDateStr.ToString().Trim());
-                
-                var endDateStr = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
-                if (string.IsNullOrWhiteSpace(endDateStr.ToString().Trim()))
-                    continue;
+                var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                var edDate = DateTime.Parse(endDateStr.ToString().Trim());
-
-                if (stDate >= startDate && edDate <= endDate)
-                    tempData.ImportRow(row);
+                tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
             }
 
-            var pData = tempData.AsEnumerable().Select(r => r.Field<string>("Project")).Distinct();
+            if (fleet != "--SELECT--")
+                tempData = tempData.Where(x => x.Project == fleet).ToList();
 
+            if (phase != "--SELECT--")
+                tempData = tempData.Where(x => x.Phase == phase).ToList();
+
+            var pData = tempData.AsEnumerable().Select(r => r.Project).Distinct();
 
             return pData;
         }
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object[] GetChartData(string name, string s_Date, string e_Date)
+        public static object[] GetChartData(string sDate, string eDate, string fleet, string phase)
         {
-            var data = new List<ChartData>();
-            foreach (DataRow row in _cData.Rows)
-            {
-                var startDate = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
-                if (string.IsNullOrWhiteSpace(startDate.ToString()))
-                    continue;
-                var stDate = DateTime.Parse(startDate.ToString().Trim());
-
-                var endDate = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
-                if (string.IsNullOrWhiteSpace(endDate.ToString().Trim()))
-                    continue;
-
-                var eDate = DateTime.Parse(endDate.ToString().Trim());
-
-                data.Add(new ChartData
-                {
-                    Project = row["Project"].ToString(),
-                    Phase = row["Phase"].ToString(),
-                    Task = row["Task"].ToString(),
-                    //Task = "",
-                    StartDate = stDate,
-                    EndDate = eDate,
-                    Fleet = row["Fleet"].ToString()
-                });
-            }
-
             List<ChartData> tempData;
-            if (string.IsNullOrWhiteSpace(s_Date) || string.IsNullOrWhiteSpace(e_Date))
-                tempData = data;
+
+            if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
+                && fleet == "--SELECT--" && phase == "--SELECT--")
+                tempData = _chartData;
             else
             {
-                var start_Date = DateTime.ParseExact(s_Date, "MM/dd/yyyy", CultureInfo.InvariantCulture);
-                var end_Date = DateTime.ParseExact(e_Date, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                tempData = _chartData;
+                if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
+                {
+                    var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                    var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                tempData = data.Where(i => i.StartDate >= start_Date && i.EndDate <= end_Date).ToList();
+                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                }
+
+                if (fleet != "--SELECT--")
+                    tempData = tempData.Where(x => x.Project == fleet).ToList();
+
+                if (phase != "--SELECT--")
+                    tempData = tempData.Where(x => x.Phase == phase).ToList();
+
             }
 
+            // 
             var date = tempData.OrderBy(x => x.StartDate).Select(x => x.StartDate).Distinct().FirstOrDefault();
 
             var newdata = new List<ChartData>();
             foreach (var project in tempData.Select(x => x.Project).Distinct().ToList())
             {
                 var projectData = tempData.Where(x => x.Project == project).ToList();
-                if(projectData.Count<=0)
+                if (projectData.Count <= 0)
                     continue;
 
                 newdata.Add(new ChartData()
                 {
                     StartDate = date,
                     EndDate = date.AddHours(4),
-                    Phase = project+".......................",
+                    Phase = project + ".......................",
                     Project = project,
-                    Task = ""
+                    Task = "",
+                    Fleet = "",
+                    Color = "#aaaaaa"
                 });
-                foreach (var chartData1 in projectData)
-                {
-                    chartData1.Phase = chartData1.Fleet + " " + chartData1.Phase;
-                    newdata.Add(chartData1);
-                }
+                newdata.AddRange(projectData);
             }
-            
+
             int j = 0;
 
 
@@ -147,25 +158,30 @@ namespace ChartsGenerator
                 "Phase",
                 "Task",
                 "StartDate",
-                "EndDate"
+                "EndDate",
+                "Fleet",
+                "Color"
                 };
             foreach (var i in newdata)
             {
                 j++;
-                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate };
+                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet ,i.Color};
             }
             return chartData;
         }
 
         protected void FleetSelected(object sender, EventArgs e)
         {
-            ddlPhase.Items.Clear();
-            ddlPhase.Items.Add("Select");
-            if (ddlPhase.SelectedValue == "-1") return;
+            var project = ddlFleet.SelectedValue;
+            if (project == "--SELECT--") return;
 
-            foreach (var reason in DictReasons[ddlExitType.SelectedValue])
+            ddlPhase.Items.Clear();
+            ddlPhase.Items.Add("--SELECT--");
+
+            var phases = _chartData.Where(x => x.Project == project).Select(x => x.Phase).Distinct();
+            foreach (var phase in phases)
             {
-                ddlPhase.Items.Add(reason);
+                ddlPhase.Items.Add(phase);
             }
         }
 

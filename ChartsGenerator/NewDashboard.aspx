@@ -32,8 +32,8 @@
             $("#Charts").html('');
             var sDate = $('#strtDate').val();
             var eDate = $('#endDate').val();
-            var fleet = '';
-            var phase = '';
+            var fleet = $('#ddlFleet').val();
+            var phase = $('#ddlPhase').val();
             if (sDate.empty || eDate.empty) {
                 sDate = "";
                 eDate = "";
@@ -48,7 +48,7 @@
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     pData = json.d;
-                    CreateChart("chart", sDate, eDate, phase,fleet);
+                    CreateChart("chart", sDate, eDate, phase, fleet);
 
                 },
                 error: function () {
@@ -87,22 +87,6 @@
             var divName = val.replace(" ", "");
             $("#Charts").append("<br /><div id =" + divName + " class='charts' ></div><br />");
 
-            var options = {
-                title: divName,
-                curveType: 'function',
-                //'legend': 'left',
-                legend: {
-                    position: 'left',
-                    labeledValueText: 'both',
-                    textStyle: {
-                        color: 'blue',
-                        fontSize: 14
-                    }
-                },
-                height: 800,
-                colors: ['#aa0000', '#00aa00', '#0000aa', '#aaaaaa', '#ffff20'],
-            };
-
             var container = document.getElementById(divName);
             var chart = new google.visualization.Timeline(container);
             var dataTable = new google.visualization.DataTable();
@@ -111,6 +95,9 @@
             dataTable.addColumn({ type: 'string', id: 'Task' });
             dataTable.addColumn({ type: 'date', id: 'Start Date' });
             dataTable.addColumn({ type: 'date', id: 'End Date' });
+
+            var colors = '';
+            var first = true;
 
             jQuery.each(cData, function (i, val) {
                 if (i != 0) {
@@ -128,9 +115,22 @@
                     var eday = eDate.getDate();
 
                     dataTable.addRows([
-                  [val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                  [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                    if (first) {
+                        colors = val[6];
+                        first = false;
+                    } else
+                        colors = colors + ',' + val[6];
                 }
             });
+
+            var options = {
+                title: divName,
+                curveType: 'function',
+                height: 800,
+                colors: colors.split(','),
+            };
+
             chart.draw(dataTable, options);
 
         }
@@ -197,20 +197,18 @@
                             <input id="endDate" type="text" class="datepicker form-control" />
                         </td>
                         <td>
-                            <span style="font-weight: bold;">Fleet : </span>
+                            <span style="font-weight: bold;">Project : </span>
                         </td>
                         <td>
-                            <asp:DropDownList ID="ddlFleet" runat="server" AutoPostBack="True">
-                                <asp:ListItem Selected="True" Text="--SELECT--" Value="--SELECT--" />
-                            </asp:DropDownList>
+                            <asp:DropDownList ID="ddlFleet" runat="server" AutoPostBack="True" ClientIDMode="Static" OnSelectedIndexChanged="FleetSelected" />
+
                         </td>
                         <td>
                             <span style="font-weight: bold;">Phase : </span>
                         </td>
                         <td>
-                            <asp:DropDownList ID="ddlPhase" runat="server">
-                                <asp:ListItem Selected="True" Text="--SELECT--" Value="--SELECT--" />
-                            </asp:DropDownList>
+                            <asp:DropDownList ID="ddlPhase" runat="server" ClientIDMode="Static" />
+
                         </td>
                         <td>
                             <input id="BtnSubmit" type="button" class="btn-primary" value="CreateChart" onclick="onLoad();" />

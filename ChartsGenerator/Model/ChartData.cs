@@ -13,6 +13,7 @@ namespace ChartsGenerator.Model
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Fleet { get; set; }
+        public string Color { get; set; }
     }
 
 }
