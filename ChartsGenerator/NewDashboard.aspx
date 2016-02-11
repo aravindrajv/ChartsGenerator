@@ -32,8 +32,12 @@
             $("#Charts").html('');
             var sDate = $('#strtDate').val();
             var eDate = $('#endDate').val();
-            var fleet = $('#ddlFleet').val();
-            var phase = $('#ddlPhase').val();
+            //var selected = $("[id*=ListBox1] option:selected");
+            var fleet = $('#lstFleet').val();
+            var phase = $('#lstPhase').val();
+            var vendor = $('#lstVendor').val();
+            var task = $('#lstTasks').val();
+
             if (sDate.empty || eDate.empty) {
                 sDate = "";
                 eDate = "";
@@ -42,13 +46,13 @@
             var pData = "";
             $.ajax({
                 url: "NewDashboard.aspx/GetProjectCount",
-                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '"}',
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '", "task":"' + task + '", "vendor":"' + vendor + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     pData = json.d;
-                    CreateChart("chart", sDate, eDate, phase, fleet);
+                    CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
 
                 },
                 error: function () {
@@ -59,12 +63,12 @@
             });
         }
 
-        function CreateChart(val, sDate, eDate, phase, fleet) {
+        function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
             var cData;
             $.ajax({
                 url: "NewDashboard.aspx/GetChartData",
                 //data: "",
-                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '"}',
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '", "task":"' + task + '", "vendor":"' + vendor + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
@@ -78,7 +82,6 @@
             }).done(function () {
 
             });
-
         }
 
 
@@ -95,6 +98,7 @@
             dataTable.addColumn({ type: 'string', id: 'Task' });
             dataTable.addColumn({ type: 'date', id: 'Start Date' });
             dataTable.addColumn({ type: 'date', id: 'End Date' });
+            
 
             var colors = '';
             var first = true;
@@ -113,9 +117,8 @@
                     var eyear = eDate.getFullYear();
                     var emonth = eDate.getMonth();
                     var eday = eDate.getDate();
-
                     dataTable.addRows([
-                  [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                  [val[5] + ' ' + val[1], val[2],  new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
                     if (first) {
                         colors = val[6];
                         first = false;
@@ -197,18 +200,28 @@
                             <input id="endDate" type="text" class="datepicker form-control" />
                         </td>
                         <td>
-                            <span style="font-weight: bold;">Project : </span>
+                            <span style="font-weight: bold;">Fleet : </span>
                         </td>
                         <td>
-                            <asp:DropDownList ID="ddlFleet" runat="server" AutoPostBack="True" ClientIDMode="Static" OnSelectedIndexChanged="FleetSelected" />
-
+                            <asp:ListBox ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td>
-                            <span style="font-weight: bold;">Phase : </span>
+                            <span style="font-weight: bold;">Release : </span>
                         </td>
                         <td>
-                            <asp:DropDownList ID="ddlPhase" runat="server" ClientIDMode="Static" />
-
+                            <asp:ListBox ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                         <td>
+                            <span style="font-weight: bold;">Vendor : </span>
+                        </td>
+                        <td>
+                            <asp:ListBox ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td>
+                            <span style="font-weight: bold;">Task : </span>
+                        </td>
+                        <td>
+                            <asp:ListBox ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td>
                             <input id="BtnSubmit" type="button" class="btn-primary" value="CreateChart" onclick="onLoad();" />

@@ -13,21 +13,39 @@ namespace ChartsGenerator {
     public partial class NewDashboard {
         
         /// <summary>
-        /// ddlFleet control.
+        /// lstFleet control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlFleet;
+        protected global::System.Web.UI.WebControls.ListBox lstFleet;
         
         /// <summary>
-        /// ddlPhase control.
+        /// lstPhase control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlPhase;
+        protected global::System.Web.UI.WebControls.ListBox lstPhase;
+        
+        /// <summary>
+        /// lstVendor control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox lstVendor;
+        
+        /// <summary>
+        /// lstTasks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox lstTasks;
     }
 }

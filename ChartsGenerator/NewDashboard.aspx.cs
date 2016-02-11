@@ -53,14 +53,31 @@ namespace ChartsGenerator
                             EndDate = eDate,
                             Fleet = row["Fleet"].ToString(),
                             Color = row["Color"].ToString(),
+                            Vendor = row["Vendor"].ToString()
                         });
                     }
-                    ddlFleet.Items.Add(new ListItem("--SELECT--"));
-                    ddlPhase.Items.Add("--SELECT--");
                     var projects = _chartData.Select(x => x.Project).Distinct();
                     foreach (var project in projects)
                     {
-                        ddlFleet.Items.Add(new ListItem(project));
+                        lstFleet.Items.Add(new ListItem(project));
+                    }
+
+                    var phases = _chartData.Select(x => x.Phase).Distinct();
+                    foreach (var phase in phases)
+                    {
+                        lstPhase.Items.Add(phase);
+                    }
+
+                    var tasks = _chartData.Select(x => x.Task).Distinct();
+                    foreach (var task in tasks)
+                    {
+                        lstTasks.Items.Add(task);
+                    }
+
+                    var vendor = _chartData.Select(x => x.Vendor).Distinct();
+                    foreach (var item in vendor)
+                    {
+                        lstVendor.Items.Add(item);
                     }
 
                     ImportToGrid();
@@ -71,10 +88,20 @@ namespace ChartsGenerator
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object GetProjectCount(string sDate, string eDate, string fleet, string phase)
+        public static object GetProjectCount(string sDate, string eDate, string fleet, string phase, string task, string vendor)
         {
+            fleet = fleet ?? "";
+            phase = phase ?? "";
+            vendor = vendor ?? "";
+            task = task ?? "";
+
+            var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var tasks = task.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
             if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
-                && fleet == "--SELECT--" && phase == "--SELECT--")
+                && fleets.Length == 0 && phases.Length == 0 && tasks.Length == 0 && vendors.Length ==0)
                 return _chartData.Select(x => x.Project).Distinct();
 
             var tempData = _chartData;
@@ -87,11 +114,17 @@ namespace ChartsGenerator
                 tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
             }
 
-            if (fleet != "--SELECT--")
-                tempData = tempData.Where(x => x.Project == fleet).ToList();
+            if (fleets.Length > 0)
+                tempData = tempData.Where(x => fleets.Contains(x.Project)).ToList();
 
-            if (phase != "--SELECT--")
-                tempData = tempData.Where(x => x.Phase == phase).ToList();
+            if (phases.Length > 0)
+                tempData = tempData.Where(x => phases.Contains(x.Phase)).ToList();
+
+            if (vendors.Length > 0)
+                tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
+
+            if (tasks.Length > 0)
+                tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
 
             var pData = tempData.AsEnumerable().Select(r => r.Project).Distinct();
 
@@ -100,12 +133,22 @@ namespace ChartsGenerator
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object[] GetChartData(string sDate, string eDate, string fleet, string phase)
+        public static object[] GetChartData(string sDate, string eDate, string fleet, string phase, string task, string vendor)
         {
+            fleet = fleet ?? "";
+            phase = phase ?? "";
+            vendor = vendor ?? "";
+            task = task ?? "";
+
+            var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var tasks = task.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
             List<ChartData> tempData;
 
             if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
-                && fleet == "--SELECT--" && phase == "--SELECT--")
+                && fleets.Length == 0 && phases.Length == 0 && vendors.Length == 0)
                 tempData = _chartData;
             else
             {
@@ -118,12 +161,17 @@ namespace ChartsGenerator
                     tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
                 }
 
-                if (fleet != "--SELECT--")
-                    tempData = tempData.Where(x => x.Project == fleet).ToList();
+                if (fleets.Length > 0)
+                    tempData = tempData.Where(x => fleets.Contains(x.Project)).ToList();
 
-                if (phase != "--SELECT--")
-                    tempData = tempData.Where(x => x.Phase == phase).ToList();
+                if (phases.Length > 0)
+                    tempData = tempData.Where(x => phases.Contains(x.Phase)).ToList();
 
+                if (vendors.Length > 0)
+                    tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
+                
+                if (tasks.Length > 0)
+                    tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
             }
 
             // 
@@ -144,7 +192,8 @@ namespace ChartsGenerator
                     Project = project,
                     Task = "",
                     Fleet = "",
-                    Color = "#aaaaaa"
+                    Color = "#aaaaaa",
+                    Vendor = ""
                 });
                 newdata.AddRange(projectData);
             }
@@ -160,28 +209,29 @@ namespace ChartsGenerator
                 "StartDate",
                 "EndDate",
                 "Fleet",
-                "Color"
+                "Color",
+                "Vendor"
                 };
             foreach (var i in newdata)
             {
                 j++;
-                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet ,i.Color};
+                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet, i.Color, i.Vendor };
             }
             return chartData;
         }
 
         protected void FleetSelected(object sender, EventArgs e)
         {
-            var project = ddlFleet.SelectedValue;
+            var project = lstFleet.SelectedValue;
             if (project == "--SELECT--") return;
 
-            ddlPhase.Items.Clear();
-            ddlPhase.Items.Add("--SELECT--");
+            lstPhase.Items.Clear();
+            lstPhase.Items.Add("--SELECT--");
 
             var phases = _chartData.Where(x => x.Project == project).Select(x => x.Phase).Distinct();
             foreach (var phase in phases)
             {
-                ddlPhase.Items.Add(phase);
+                lstPhase.Items.Add(phase);
             }
         }
 
@@ -234,7 +284,7 @@ namespace ChartsGenerator
                 //connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
                 connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';";
             }
-            const string query = "SELECT [Project], [Phase], [Task], [Duration], [StartDate], [EndDate]  FROM [Sheet1$]";
+            const string query = "SELECT [Project], [Phase], [Task], [Duration], [StartDate], [EndDate], [Vendor]  FROM [Sheet1$]";
             var conn = new OleDbConnection(connString);
             if (conn.State == ConnectionState.Closed)
                 conn.Open();

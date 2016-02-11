@@ -14,6 +14,7 @@ namespace ChartsGenerator.Model
         public DateTime EndDate { get; set; }
         public string Fleet { get; set; }
         public string Color { get; set; }
+        public string Vendor { get; set; }
     }
 
 }
