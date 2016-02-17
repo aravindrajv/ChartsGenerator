@@ -187,7 +187,7 @@
                         <input id="endDate" type="text" class="datepicker form-control"  /> 
                     </td>
                     <td >
-                        <input id="BtnSubmit" type="button" class="btn-primary" value="CreateChart" onclick="onLoad();"/>
+                        <input id="BtnSubmit" type="button" class="btn-primary" value="Generate" onclick="onLoad();"/>
                     </td>
                 </tr>
                
