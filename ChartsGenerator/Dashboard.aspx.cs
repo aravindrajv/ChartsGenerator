@@ -90,6 +90,7 @@ namespace ChartsGenerator
                     Project = row["Project"].ToString(),
                     Phase = row["Phase"].ToString(),
                     Task = row["Task"].ToString(),
+                    //Task = "",
                     StartDate = stDate,
                     EndDate = eDate
                 });
@@ -183,8 +184,8 @@ namespace ChartsGenerator
             var da = new OleDbDataAdapter(cmd);
             var ds = new DataSet();
             da.Fill(ds);
-            grvExcelData.DataSource = ds.Tables[0];
-            grvExcelData.DataBind();
+            //grvExcelData.DataSource = ds.Tables[0];
+            //grvExcelData.DataBind();
             da.Dispose();
             conn.Close();
             conn.Dispose();
@@ -193,8 +194,8 @@ namespace ChartsGenerator
         protected void PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             ImportToGrid();
-            grvExcelData.PageIndex = e.NewPageIndex;
-            grvExcelData.DataBind();
+            //grvExcelData.PageIndex = e.NewPageIndex;
+            //grvExcelData.DataBind();
         }
     }
 }

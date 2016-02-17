@@ -24,7 +24,7 @@ namespace ChartsGenerator
             var fName = RandomHexString(5)+ ".xlsx";
             FileUploadXL.PostedFile.SaveAs(Server.MapPath("~/input/") + fName);
             Session["FPath"] = (Server.MapPath(Path.Combine("~/input/", fName)));
-            Response.Redirect("Dashboard.aspx");
+            Response.Redirect("NewDashboard.aspx");
         }
 
         public string RandomHexString(int length)

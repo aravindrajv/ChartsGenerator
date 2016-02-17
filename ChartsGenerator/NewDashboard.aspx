@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Dashboard.aspx.cs" Inherits="ChartsGenerator.Dashboard" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="NewDashboard.aspx.cs" Inherits="ChartsGenerator.NewDashboard" %>
 
 <!DOCTYPE html>
 
@@ -21,18 +21,27 @@
         }
 
         .FilterTable td {
-            text-align: center;
+            text-align: left;
             vertical-align: middle;
             padding: 2px;
-            width: 100px;
-            
+            width: 120px;
         }
+
+            .FilterTable td input {
+                width: 100px;
+                height: 25px;
+            }
     </style>
     <script type="text/javascript">
         function onLoad() {
             $("#Charts").html('');
             var sDate = $('#strtDate').val();
             var eDate = $('#endDate').val();
+            //var selected = $("[id*=ListBox1] option:selected");
+            var fleet = $('#lstFleet').val();
+            var phase = $('#lstPhase').val();
+            var vendor = $('#lstVendor').val();
+            var task = $('#lstTasks').val();
 
             if (sDate.empty || eDate.empty) {
                 sDate = "";
@@ -41,16 +50,15 @@
 
             var pData = "";
             $.ajax({
-                url: "Dashboard.aspx/GetProjectCount",
-                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '"}',
+                url: "NewDashboard.aspx/GetProjectCount",
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '", "task":"' + task + '", "vendor":"' + vendor + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     pData = json.d;
-                    jQuery.each(pData, function (i, val) {
-                        CreateChart(val, sDate, eDate);
-                    });
+                    CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
+
                 },
                 error: function () {
                     alert("Error loading data! Please try again.");
@@ -60,12 +68,12 @@
             });
         }
 
-        function CreateChart(val, sDate, eDate) {
+        function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
             var cData;
             $.ajax({
-                url: "Dashboard.aspx/GetChartData",
+                url: "NewDashboard.aspx/GetChartData",
                 //data: "",
-                data: '{"name":"' + val + '", "s_Date":"' + sDate + '", "e_Date":"' + eDate + '"}',
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '", "task":"' + task + '", "vendor":"' + vendor + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
@@ -79,20 +87,13 @@
             }).done(function () {
 
             });
-
         }
 
 
         function AddData(cData, val) {
 
             var divName = val.replace(" ", "");
-            $("#Charts").append("<h3 align='center'>" + val + "</h3><div id =" + divName + " class='charts' ></div><br />");
-
-            var options = {
-                title: divName,
-                curveType: 'function',
-                legend: { position: 'bottom' }
-            };
+            $("#Charts").append("<br /><div id =" + divName + " class='charts' ></div><br />");
 
             var container = document.getElementById(divName);
             var chart = new google.visualization.Timeline(container);
@@ -102,6 +103,10 @@
             dataTable.addColumn({ type: 'string', id: 'Task' });
             dataTable.addColumn({ type: 'date', id: 'Start Date' });
             dataTable.addColumn({ type: 'date', id: 'End Date' });
+
+
+            var colors = '';
+            var first = true;
 
             jQuery.each(cData, function (i, val) {
                 if (i != 0) {
@@ -117,11 +122,23 @@
                     var eyear = eDate.getFullYear();
                     var emonth = eDate.getMonth();
                     var eday = eDate.getDate();
-
                     dataTable.addRows([
-                  [val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                  [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                    if (first) {
+                        colors = val[6];
+                        first = false;
+                    } else
+                        colors = colors + ',' + val[6];
                 }
             });
+
+            var options = {
+                title: divName,
+                curveType: 'function',
+                height: 800,
+                colors: colors.split(','),
+            };
+
             chart.draw(dataTable, options);
 
         }
@@ -131,7 +148,7 @@
         });
 
     </script>
-    
+
     <%--Filter--%>
     <script>
         $(document).ready(function () {
@@ -154,51 +171,69 @@
             }).data('datepicker');
         });
 
- 
-</script>
+
+    </script>
 </head>
 <body>
     <form runat="server">
-    <div class="container ">
-        <div class="navbar navbar-default" style="text-align: center;">
-            <div>
-                &nbsp;Dashboard
+        <div class="container ">
+            <div class="navbar navbar-default" style="text-align: center;">
+                <div>
+                    &nbsp;Dashboard
+                </div>
             </div>
-        </div>
-        <%--<div>
+            <a href="Home.aspx">Back</a>
+            <%--<div>
             <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging="PageIndexChanging" AllowPaging="true" Width="100%" Style="text-align: left; border-color: gray;">
                     <HeaderStyle BackColor="#158CBA" Font-Bold="true" ForeColor="White" />
                 </asp:GridView>
             </div>
         <br/>--%>
-        <div >
-                <table class="FilterTable"  >
-                <tr>
-                    <td>
-                        <span style="font-weight: bold;">Start Date :</span>
-                    </td>
-                    <td>
-                        <input id="strtDate" type="text" class="datepicker form-control" />
-                    </td>
-                    <td>
-                        <span style="font-weight: bold;">End Date : </span>
-                    </td>
-                    <td>
-                        <input id="endDate" type="text" class="datepicker form-control"  /> 
-                    </td>
-                    <td >
-                        <input id="BtnSubmit" type="button" class="btn-primary" value="Generate" onclick="onLoad();"/>
-                    </td>
-                </tr>
-               
-            </table>
+            <div>
+                <table class="FilterTable">
+                    <tr>
+                        <td>
+                            <span style="font-weight: bold;">Start Date :</span>
+                        </td>
+                        <td style="padding-top: 15px;">
+                            <input id="strtDate" type="text" class="datepicker form-control" />
+                        </td>
+                        <td rowspan="2">
+                            <span style="font-weight: bold;">Vendor : </span>
+                            <asp:ListBox ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td rowspan="2" >
+                            <span style="font-weight: bold;">Fleet : </span>
+                            <asp:ListBox ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td rowspan="2">
+                            <span style="font-weight: bold;">Release : </span>
+                            <asp:ListBox ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td rowspan="2">
+                            <span style="font-weight: bold;">Task : </span>
+                            <asp:ListBox ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" style="padding-top: 15px;"/>
+                        </td>
+                        <td rowspan="2">
+                            <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span style="font-weight: bold;">End Date : </span>
+                        </td>
+                        <td>
+                            <input id="endDate" type="text" class="datepicker form-control" />
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-     <div>
-            <div id="Charts"></div>
+            <div>
+                <div id="Charts"></div>
+            </div>
+
         </div>
-        <a href="Home.aspx">Back</a>
-    </div>
-        </form>
+    </form>
 </body>
 </html>
