@@ -31,10 +31,57 @@
                 width: 100px;
                 height: 25px;
             }
+
+        .ListBoxCssClass {
+        }
     </style>
     <script type="text/javascript">
         function onLoad() {
             $("#Charts").html('');
+            var sDate = $('#strtDate').val();
+            var eDate = $('#endDate').val();
+            //var selected = $("[id*=ListBox1] option:selected");
+            var fleet = $('#lstFleet').val();
+            var phase = $('#lstPhase').val();
+            var vendor = $('#lstVendor').val();
+            var task = $('#lstTasks').val();
+
+            if (sDate.empty || eDate.empty) {
+                sDate = "";
+                eDate = "";
+            }
+
+            var pData = "";
+            $.ajax({
+                url: "NewDashboard.aspx/GetProjectCount",
+                data: '{"sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '", "task":"' + task + '", "vendor":"' + vendor + '"}',
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; chartset=utf-8",
+                success: function (json) {
+                    pData = json.d;
+                    CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
+
+                },
+                error: function () {
+                    alert("Error loading data! Please try again.");
+                }
+            }).done(function () {
+
+            });
+        }
+
+        function clearfilters() {
+            $("#Charts").html('');
+
+            $('#strtDate').val();
+            $('#endDate').val();
+            $("#lstFleet").val([]);
+            $("#lstPhase").val([]);
+            $("#lstVendor").val([]);
+            $("#lstTasks").val([]);
+
+
             var sDate = $('#strtDate').val();
             var eDate = $('#endDate').val();
             //var selected = $("[id*=ListBox1] option:selected");
@@ -200,22 +247,28 @@
                         </td>
                         <td rowspan="2">
                             <span style="font-weight: bold;">Vendor : </span>
-                            <asp:ListBox ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td rowspan="2" >
+                        <td rowspan="2">
                             <span style="font-weight: bold;">Fleet : </span>
-                            <asp:ListBox ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td rowspan="2">
                             <span style="font-weight: bold;">Release : </span>
-                            <asp:ListBox ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td rowspan="2">
-                            <span style="font-weight: bold;">Task : </span>
-                            <asp:ListBox ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" style="padding-top: 15px;"/>
+                            <span style="font-weight: bold;">Exclude Task : </span>
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" Style="width: " />
                         </td>
                         <td rowspan="2">
-                            <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
+                            <div class="row">
+                                <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
+                            </div>
+                            <br />
+                            <div class="row">
+                            <input id="ClearBtn" type="button" class="btn-primary" value="Clear Filters" onclick="Clear();" />
+                                </div>
                         </td>
                     </tr>
                     <tr>
