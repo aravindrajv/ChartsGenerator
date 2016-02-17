@@ -24,7 +24,7 @@
             <table align="center">
                 <tr>
                     <td colspan="2" align="center">
-                        <a href="sample/template4.xlsx">Sample File</a>
+                        <a href="sample/sampletemplate.xlsx">Sample File</a>
                     </td>
                 </tr>
                 <tr>
