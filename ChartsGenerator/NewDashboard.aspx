@@ -21,11 +21,16 @@
         }
 
         .FilterTable td {
-            text-align: center;
+            text-align: left;
             vertical-align: middle;
             padding: 2px;
-            width: 100px;
+            width: 120px;
         }
+
+            .FilterTable td input {
+                width: 100px;
+                height: 25px;
+            }
     </style>
     <script type="text/javascript">
         function onLoad() {
@@ -98,7 +103,7 @@
             dataTable.addColumn({ type: 'string', id: 'Task' });
             dataTable.addColumn({ type: 'date', id: 'Start Date' });
             dataTable.addColumn({ type: 'date', id: 'End Date' });
-            
+
 
             var colors = '';
             var first = true;
@@ -118,7 +123,7 @@
                     var emonth = eDate.getMonth();
                     var eday = eDate.getDate();
                     dataTable.addRows([
-                  [val[5] + ' ' + val[1], val[2],  new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                  [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
                     if (first) {
                         colors = val[6];
                         first = false;
@@ -190,44 +195,37 @@
                         <td>
                             <span style="font-weight: bold;">Start Date :</span>
                         </td>
-                        <td>
+                        <td style="padding-top: 15px;">
                             <input id="strtDate" type="text" class="datepicker form-control" />
                         </td>
+                        <td rowspan="2">
+                            <span style="font-weight: bold;">Vendor : </span>
+                            <asp:ListBox ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td rowspan="2" >
+                            <span style="font-weight: bold;">Fleet : </span>
+                            <asp:ListBox ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td rowspan="2">
+                            <span style="font-weight: bold;">Release : </span>
+                            <asp:ListBox ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                        </td>
+                        <td rowspan="2">
+                            <span style="font-weight: bold;">Task : </span>
+                            <asp:ListBox ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" style="padding-top: 15px;"/>
+                        </td>
+                        <td rowspan="2">
+                            <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
+                        </td>
+                    </tr>
+                    <tr>
                         <td>
                             <span style="font-weight: bold;">End Date : </span>
                         </td>
                         <td>
                             <input id="endDate" type="text" class="datepicker form-control" />
                         </td>
-                        <td>
-                            <span style="font-weight: bold;">Fleet : </span>
-                        </td>
-                        <td>
-                            <asp:ListBox ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
-                        </td>
-                        <td>
-                            <span style="font-weight: bold;">Release : </span>
-                        </td>
-                        <td>
-                            <asp:ListBox ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
-                        </td>
-                         <td>
-                            <span style="font-weight: bold;">Vendor : </span>
-                        </td>
-                        <td>
-                            <asp:ListBox ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
-                        </td>
-                        <td>
-                            <span style="font-weight: bold;">Task : </span>
-                        </td>
-                        <td>
-                            <asp:ListBox ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
-                        </td>
-                        <td>
-                            <input id="BtnSubmit" type="button" class="btn-primary" value="CreateChart" onclick="onLoad();" />
-                        </td>
                     </tr>
-
                 </table>
             </div>
 

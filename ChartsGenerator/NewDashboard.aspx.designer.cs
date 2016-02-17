@@ -13,6 +13,15 @@ namespace ChartsGenerator {
     public partial class NewDashboard {
         
         /// <summary>
+        /// lstVendor control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox lstVendor;
+        
+        /// <summary>
         /// lstFleet control.
         /// </summary>
         /// <remarks>
@@ -29,15 +38,6 @@ namespace ChartsGenerator {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ListBox lstPhase;
-        
-        /// <summary>
-        /// lstVendor control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ListBox lstVendor;
         
         /// <summary>
         /// lstTasks control.
