@@ -42,7 +42,7 @@
                         <asp:FileUpload ID="FileUploadXL" runat="server" />
                         <asp:RequiredFieldValidator ErrorMessage="Required" ControlToValidate="FileUploadXL"
                             runat="server" Display="Dynamic" ForeColor="Red" />
-                        <asp:RegularExpressionValidator ID="RegularExpressionValidator1" ValidationExpression="([a-zA-Z0-9\s_\\.\-:])+(.xlsx)$"
+                        <asp:RegularExpressionValidator ID="RegularExpressionValidator1" ValidationExpression="(^.*\.xlsx)$"
                             ControlToValidate="FileUploadXL" runat="server" ForeColor="Red" ErrorMessage="Please select a valid xlsx file."
                             Display="Dynamic" />
                     </td>

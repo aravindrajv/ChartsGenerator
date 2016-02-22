@@ -179,6 +179,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomListBox.cs" />
     <Compile Include="NewDashboard.aspx.cs">
       <DependentUpon>NewDashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
