@@ -27,60 +27,84 @@ namespace ChartsGenerator
                 }
                 else
                 {
-                    var filepath = HttpContext.Current.Session["FPath"].ToString();
-                    _cData = ConvertExcelToDataTable(filepath);
-                    _chartData = new List<ChartData>();
-                    foreach (DataRow row in _cData.Rows)
+                    try
                     {
-                        var startDate = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
-                        if (string.IsNullOrWhiteSpace(startDate.ToString()))
-                            continue;
-                        var stDate = DateTime.Parse(startDate.ToString().Trim());
+                        var filepath = HttpContext.Current.Session["FPath"].ToString();
+                        _cData = ConvertExcelToDataTable(filepath, "Data");
 
-                        var endDate = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
-                        if (string.IsNullOrWhiteSpace(endDate.ToString().Trim()))
-                            continue;
+                        var colorDataTable = ConvertExcelToDataTable(filepath, "Color");
+                        var colors = (from DataRow row in colorDataTable.Rows
+                                      select new ColorData()
+                                      {
+                                          Color = row["Color"].ToString(),
+                                          Task = row["Task"].ToString(),
+                                      }).ToList();
 
-                        var eDate = DateTime.Parse(endDate.ToString().Trim());
-
-                        _chartData.Add(new ChartData
+                        _chartData = new List<ChartData>();
+                        foreach (DataRow row in _cData.Rows)
                         {
-                            Project = row["Project"].ToString(),
-                            Phase = row["Phase"].ToString(),
-                            Task = row["Task"].ToString(),
-                            //Task = "",
-                            StartDate = stDate,
-                            EndDate = eDate,
-                            Fleet = row["Fleet"].ToString(),
-                            Color = row["Color"].ToString(),
-                            Vendor = row["Vendor"].ToString()
-                        });
-                    }
-                    var projects = _chartData.Select(x => x.Project).Distinct();
-                    foreach (var project in projects)
-                    {
-                        lstFleet.Items.Add(new ListItem(project));
-                    }
+                            var startDate = row["StartDate"] != DBNull.Value ? row["StartDate"] : "";
+                            if (string.IsNullOrWhiteSpace(startDate.ToString()))
+                                continue;
+                            var stDate = DateTime.Parse(startDate.ToString().Trim());
 
-                    var phases = _chartData.Select(x => x.Phase).Distinct();
-                    foreach (var phase in phases)
-                    {
-                        lstPhase.Items.Add(phase);
-                    }
+                            var endDate = row["EndDate"] != DBNull.Value ? row["EndDate"] : "";
+                            if (string.IsNullOrWhiteSpace(endDate.ToString().Trim()))
+                                continue;
 
-                    var tasks = _chartData.Select(x => x.Task).Distinct();
-                    foreach (var task in tasks)
-                    {
-                        lstTasks.Items.Add(task);
-                    }
+                            var eDate = DateTime.Parse(endDate.ToString().Trim());
 
-                    var vendor = _chartData.Select(x => x.Vendor).Distinct();
-                    foreach (var item in vendor)
-                    {
-                        lstVendor.Items.Add(item);
-                    }
+                            var chartData = new ChartData
+                            {
+                                Project = row["Project"].ToString(),
+                                Phase = row["Phase"].ToString(),
+                                Task = row["Task"].ToString(),
+                                //Task = "",
+                                StartDate = stDate,
+                                EndDate = eDate,
+                                Fleet = row["Fleet"].ToString(),
+                                Vendor = row["Vendor"].ToString(),
+                                Color = row["Color"].ToString()
+                            };
+                            var color = colors.FirstOrDefault(x => x.Task == chartData.Task);
+                            if (color != null)
+                                chartData.Color = color.Color;
+                            else
+                            {
+                                Response.Write("");
+                            }
+                            _chartData.Add(chartData);
+                        }
+                        var projects = _chartData.Select(x => x.Project).Distinct();
+                        foreach (var project in projects)
+                        {
+                            lstFleet.Items.Add(new ListItem(project));
+                        }
 
-                    ImportToGrid();
+                        var phases = _chartData.Select(x => x.Phase).Distinct();
+                        foreach (var phase in phases)
+                        {
+                            lstPhase.Items.Add(phase);
+                        }
+
+                        var tasks = _chartData.Select(x => x.Task).Distinct();
+                        foreach (var task in tasks)
+                        {
+                            lstTasks.Items.Add(task);
+                        }
+
+                        var vendor = _chartData.Select(x => x.Vendor).Distinct();
+                        foreach (var item in vendor)
+                        {
+                            lstVendor.Items.Add(item);
+                        }
+                        Error.Visible = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        Error.Visible = true;
+                        Error.Text = ex.Message;
+                    }
                 }
 
             }
@@ -90,45 +114,52 @@ namespace ChartsGenerator
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetProjectCount(string sDate, string eDate, string fleet, string phase, string task, string vendor)
         {
-            fleet = fleet ?? "";
-            phase = phase ?? "";
-            vendor = vendor ?? "";
-            task = task ?? "";
-
-            var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            var tasks = task.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-            if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
-                && fleets.Length == 0 && phases.Length == 0 && tasks.Length == 0 && vendors.Length ==0)
-                return _chartData.Select(x => x.Project).Distinct();
-
-            var tempData = _chartData;
-
-            if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
+            try
             {
-                var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
-                var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                fleet = fleet ?? "";
+                phase = phase ?? "";
+                vendor = vendor ?? "";
+                task = task ?? "";
 
-                tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                var tasks = task.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
+                    && fleets.Length == 0 && phases.Length == 0 && tasks.Length == 0 && vendors.Length == 0)
+                    return _chartData.Select(x => x.Project).Distinct();
+
+                var tempData = _chartData;
+
+                if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
+                {
+                    var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                    var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+
+                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                }
+
+                if (fleets.Length > 0)
+                    tempData = tempData.Where(x => fleets.Contains(x.Project)).ToList();
+
+                if (phases.Length > 0)
+                    tempData = tempData.Where(x => phases.Contains(x.Phase)).ToList();
+
+                if (vendors.Length > 0)
+                    tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
+
+                if (tasks.Length > 0)
+                    tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
+
+                var pData = tempData.AsEnumerable().Select(r => r.Project).Distinct();
+
+                return pData;
             }
-
-            if (fleets.Length > 0)
-                tempData = tempData.Where(x => fleets.Contains(x.Project)).ToList();
-
-            if (phases.Length > 0)
-                tempData = tempData.Where(x => phases.Contains(x.Phase)).ToList();
-
-            if (vendors.Length > 0)
-                tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
-
-            if (tasks.Length > 0)
-                tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
-
-            var pData = tempData.AsEnumerable().Select(r => r.Project).Distinct();
-
-            return pData;
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         [WebMethod]
@@ -169,7 +200,7 @@ namespace ChartsGenerator
 
                 if (vendors.Length > 0)
                     tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
-                
+
                 if (tasks.Length > 0)
                     tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
             }
@@ -235,33 +266,38 @@ namespace ChartsGenerator
             }
         }
 
-        public static DataTable ConvertExcelToDataTable(string fileName)
+        public static DataTable ConvertExcelToDataTable(string fileName, string sheetName)
         {
-            DataTable dtResult = null;
-            int totalSheet = 0; //No of sheets on excel file  
-            using (OleDbConnection objConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + fileName + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';"))
+            using (var objConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + fileName + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';"))
             {
                 objConn.Open();
-                OleDbCommand cmd = new OleDbCommand();
-                OleDbDataAdapter oleda = new OleDbDataAdapter();
-                DataSet ds = new DataSet();
-                DataTable dt = objConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-                string sheetName = string.Empty;
+                var cmd = new OleDbCommand();
+                var ds = new DataSet();
+                var dt = objConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
                 if (dt != null)
                 {
                     var tempDataTable = (from dataRow in dt.AsEnumerable()
                                          where !dataRow["TABLE_NAME"].ToString().Contains("FilterDatabase")
                                          select dataRow).CopyToDataTable();
                     dt = tempDataTable;
-                    totalSheet = dt.Rows.Count;
-                    sheetName = dt.Rows[0]["TABLE_NAME"].ToString();
+                    var totalSheet = dt.Rows.Count; //No of sheets on excel file  
+                    for (var i = 0; i < totalSheet; i++)
+                    {
+                        var name = dt.Rows[i]["TABLE_NAME"].ToString();
+
+                        if (name.Contains(sheetName))
+                        {
+                            sheetName = name;
+                            break;
+                        }
+                    }
                 }
                 cmd.Connection = objConn;
                 cmd.CommandType = CommandType.Text;
                 cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
-                oleda = new OleDbDataAdapter(cmd);
+                var oleda = new OleDbDataAdapter(cmd);
                 oleda.Fill(ds, "excelData");
-                dtResult = ds.Tables["excelData"];
+                var dtResult = ds.Tables["excelData"];
                 objConn.Close();
                 return dtResult; //Returning Dattable  
             }

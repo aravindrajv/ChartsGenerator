@@ -236,8 +236,12 @@
                 </asp:GridView>
             </div>
         <br/>--%>
+
             <div>
-                <table class="FilterTable">
+                <asp:Label style="color: red;" id="Error" runat="server" ></asp:Label>
+            </div>
+            <div>
+                <table class="FilterTable" id="Filters" runat="server">
                     <tr>
                         <td>
                             <span style="font-weight: bold;">Start Date :</span>
@@ -261,14 +265,8 @@
                             <span style="font-weight: bold;">Exclude Task : </span>
                             <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" Style="width: " />
                         </td>
-                        <td rowspan="2">
-                            <div class="row">
-                                <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
-                            </div>
-                            <br />
-                            <div class="row">
-                            <input id="ClearBtn" type="button" class="btn-primary" value="Clear Filters" onclick="Clear();" />
-                                </div>
+                        <td style="vertical-align: bottom;">
+                            <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
                         </td>
                     </tr>
                     <tr>
@@ -277,6 +275,9 @@
                         </td>
                         <td>
                             <input id="endDate" type="text" class="datepicker form-control" />
+                        </td>
+                        <td>
+                            <input id="ClearBtn" type="button" class="btn-primary" value="Clear Filters" onclick="clearfilters();" />
                         </td>
                     </tr>
                 </table>

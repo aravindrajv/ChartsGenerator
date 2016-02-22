@@ -101,6 +101,7 @@
     <None Include="Properties\PublishProfiles\Dashboard.pubxml" />
     <Content Include="sample\template2.xlsx" />
     <Content Include="sample\template4.xlsx" />
+    <Content Include="sample\sampletemplate.xlsx" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\bootstrap-datepicker.js" />
     <Content Include="Scripts\bootstrap-datepicker.min.js" />
@@ -178,6 +179,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomListBox.cs" />
     <Compile Include="NewDashboard.aspx.cs">
       <DependentUpon>NewDashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
