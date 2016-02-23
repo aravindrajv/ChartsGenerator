@@ -14,7 +14,6 @@ namespace ChartsGenerator
 {
     public partial class NewDashboard : System.Web.UI.Page
     {
-        private static DataTable _cData;
         private static List<ChartData> _chartData;
 
         protected void Page_Load(object sender, EventArgs e)
@@ -30,7 +29,7 @@ namespace ChartsGenerator
                     try
                     {
                         var filepath = HttpContext.Current.Session["FPath"].ToString();
-                        _cData = ConvertExcelToDataTable(filepath, "Data");
+                        var _cData = ConvertExcelToDataTable(filepath, "Data");
 
                         var colorDataTable = ConvertExcelToDataTable(filepath, "Color");
                          var colors = (from DataRow row in colorDataTable.Rows
@@ -303,41 +302,6 @@ namespace ChartsGenerator
             }
         }
 
-        [WebMethod]
-        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object GenerateLegends(string val)
-        {
-            var html = "";
-            if (val == "")
-            {
-                foreach (var data in colors)
-                {
-                    var task = data.Task;
-                    var color = data.Color;
-                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
-                }
-            }
-            else
-            {
-                var selectedval = val.Split(',');
-                foreach (string item in selectedval)
-                {
-                    foreach (var data in colors)
-                    {
-                        var task = data.Task;
-                        var color = data.Color;
-                        if (item != task)
-                        {
-                            html = html + "<span title='" + task + "'><svg width='15' height='15'><rect width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
-                        }
-                    }
-                }
-            }
-            
-            return html;
-        }
-
-
         public void ImportToGrid()
         {
             var connString = "";
@@ -374,6 +338,38 @@ namespace ChartsGenerator
             ImportToGrid();
             //grvExcelData.PageIndex = e.NewPageIndex;
             //grvExcelData.DataBind();
+        }
+
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GenerateLegends(string val)
+        {
+            var html = "";
+            if (val == "")
+            {
+                var newdata = _chartData.Select(x => x.Task).Distinct();
+                foreach (var data in newdata)
+                {
+                    var task = data;
+                    var color = _chartData.Where(x => x.Task == task).Select(x=>x.Color).FirstOrDefault();
+                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                }
+            }
+            else 
+            {
+                var selectedval = val.Split(',');
+                var newdata = _chartData.Where(x => !selectedval.Contains(x.Task)).Select(x => x.Task).Distinct();
+                    foreach (var data in newdata)
+                    {
+                        var task = data;
+                        var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
+                        html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                    }
+                
+            }
+
+            return html;
         }
     }
 }

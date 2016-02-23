@@ -18,20 +18,18 @@
             overflow-y: hidden;
             /*min-height: 400px;*/
         }
-
-        .FilterTable td {
-            text-align: left;
-            vertical-align: middle;
-            padding: 2px;
-            width: 120px;
+        .fields {
+            width: 130px;height: 25px;
         }
+        
 
-            .FilterTable td input {
-                width: 100px;
-                height: 25px;
-            }
 
         .ListBoxCssClass {
+            width: 150px;
+        }
+
+        .btncustom {
+            width: 100px;
         }
     </style>
     <script type="text/javascript">
@@ -208,6 +206,7 @@
                 }
             });
 
+
             var options = {
                 title: divName,
                 curveType: 'function',
@@ -270,43 +269,47 @@
                 <asp:Label style="color: red;" id="Error" runat="server" ></asp:Label>
             </div>
             <div>
-                <table class="FilterTable" id="Filters" runat="server">
+                <table id="FilterTable">
                     <tr>
-                        <td>
+                        <td style="width: 100px;">
+                            <br/>
                             <span style="font-weight: bold;">Start Date :</span>
+                            <br/>
+                            <br/>
+                            <span style="font-weight: bold;">End Date &nbsp;&nbsp;:</span>
                         </td>
-                        <td style="padding-top: 15px;">
-                            <input id="strtDate" type="text" class="datepicker form-control" />
+                        <td style="width: 175px;">
+                            <br/>
+                            <input class="fields" id="strtDate" type="text" class="datepicker " />
+                            <br/><br/>
+                            <input class="fields" id="endDate" type="text" class="datepicker " />
                         </td>
-                        <td rowspan="2">
+                        <td style="width: 175px;">
                             <span style="font-weight: bold;">Vendor : </span>
+                            <br/>
                             <asp:ListBox  CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td rowspan="2">
+                        <td style="width: 175px;">
                             <span style="font-weight: bold;">Fleet : </span>
+                            <br/>
                             <asp:ListBox CssClass="ListBoxCssClass" ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td rowspan="2">
+                        <td style="width: 175px;">
                             <span style="font-weight: bold;">Release : </span>
+                            <br/>
                             <asp:ListBox CssClass="ListBoxCssClass" ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td rowspan="2">
+                        <td style="width: 175px;">
                             <span style="font-weight: bold;">Exclude Task : </span>
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" Style="width: " />
+                            <br/>
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple"  />
                         </td>
-                        <td style="vertical-align: bottom;">
-                            <input id="BtnSubmit" type="button" class="btn-primary" value="Create Chart" onclick="onLoad();" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span style="font-weight: bold;">End Date : </span>
-                        </td>
-                        <td>
-                            <input id="endDate" type="text" class="datepicker form-control" />
-                        </td>
-                        <td>
-                            <input id="ClearBtn" type="button" class="btn-primary" value="Clear Filters" onclick="clearfilters();" />
+                        <td style="width: 175px;">
+                            <br/>
+                            <input id="BtnSubmit" type="button" class="btn-primary btncustom" value="Create Chart" onclick="onLoad();" />
+                            <br/>
+                            <br/>
+                            <input id="ClearBtn" type="button" class="btn-primary btncustom" value="Clear Filters" onclick="clearfilters();" />
                         </td>
                     </tr>
                 </table>
