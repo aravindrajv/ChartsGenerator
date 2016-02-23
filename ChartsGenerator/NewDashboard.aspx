@@ -22,8 +22,6 @@
             width: 130px;height: 25px;
         }
         
-
-
         .ListBoxCssClass {
             width: 150px;
         }
@@ -258,6 +256,7 @@
                 </div>
             </div>
             <a href="Home.aspx">Back</a>
+            
             <%--<div>
             <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging="PageIndexChanging" AllowPaging="true" Width="100%" Style="text-align: left; border-color: gray;">
                     <HeaderStyle BackColor="#158CBA" Font-Bold="true" ForeColor="White" />
@@ -268,7 +267,9 @@
             <div>
                 <asp:Label style="color: red;" id="Error" runat="server" ></asp:Label>
             </div>
-            <div>
+            <br/>
+            
+            <div style="background-color: #E6E6E6; padding-top: 10px;padding-bottom: 10px;padding-left: 9px; border-radius: 10px;">
                 <table id="FilterTable">
                     <tr>
                         <td style="width: 100px;">
@@ -315,10 +316,10 @@
                 </table>
             </div>
             <br/>
-            <div id="LegendsDiv">
-                
+            <div style="background-color: #E6E6E6; padding-top: 10px;padding-bottom: 10px;padding-left: 9px; border-radius: 10px;">
+                <div id="LegendsDiv" >
             </div>
-
+                </div>
             <div>
                 <div id="Charts"></div>
             </div>
