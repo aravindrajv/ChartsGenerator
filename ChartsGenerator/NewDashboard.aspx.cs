@@ -33,7 +33,7 @@ namespace ChartsGenerator
                         _cData = ConvertExcelToDataTable(filepath, "Data");
 
                         var colorDataTable = ConvertExcelToDataTable(filepath, "Color");
-                        var colors = (from DataRow row in colorDataTable.Rows
+                         var colors = (from DataRow row in colorDataTable.Rows
                                       select new ColorData()
                                       {
                                           Color = row["Color"].ToString(),
@@ -301,6 +301,40 @@ namespace ChartsGenerator
                 objConn.Close();
                 return dtResult; //Returning Dattable  
             }
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GenerateLegends(string val)
+        {
+            var html = "";
+            if (val == "")
+            {
+                foreach (var data in colors)
+                {
+                    var task = data.Task;
+                    var color = data.Color;
+                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                }
+            }
+            else
+            {
+                var selectedval = val.Split(',');
+                foreach (string item in selectedval)
+                {
+                    foreach (var data in colors)
+                    {
+                        var task = data.Task;
+                        var color = data.Color;
+                        if (item != task)
+                        {
+                            html = html + "<span title='" + task + "'><svg width='15' height='15'><rect width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                        }
+                    }
+                }
+            }
+            
+            return html;
         }
 
 

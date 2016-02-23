@@ -1,5 +1,4 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="NewDashboard.aspx.cs" Inherits="ChartsGenerator.NewDashboard" %>
-
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -69,6 +68,7 @@
             }).done(function () {
 
             });
+            GenerateLegends();
         }
 
         function clearfilters() {
@@ -113,7 +113,36 @@
             }).done(function () {
 
             });
+            GenerateLegends();
         }
+
+        function GenerateLegends() {
+            var selectedVal = [];
+            $('#lstTasks :selected').each(function (i, selected) {
+                selectedVal[i] = $(selected).text();
+                //alert(selectedVal[i]);
+            });
+
+            $("#LegendsDiv").html('');
+                $.ajax({
+                    url: "NewDashboard.aspx/GenerateLegends",
+                    data: '{"val":"' + selectedVal + '"}',
+                    dataType: "json",
+                    type: "POST",
+                    contentType: "application/json; chartset=utf-8",
+                    success: function (json) {
+                        $("#LegendsDiv").html(json.d);
+                        //  CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
+
+                    },
+                    error: function () {
+                        alert("Error loading data! Please try again.");
+                    }
+                }).done(function () {
+
+                });
+            }
+        
 
         function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
             var cData;
@@ -251,7 +280,7 @@
                         </td>
                         <td rowspan="2">
                             <span style="font-weight: bold;">Vendor : </span>
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox  CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td rowspan="2">
                             <span style="font-weight: bold;">Fleet : </span>
@@ -281,6 +310,10 @@
                         </td>
                     </tr>
                 </table>
+            </div>
+            <br/>
+            <div id="LegendsDiv">
+                
             </div>
 
             <div>
