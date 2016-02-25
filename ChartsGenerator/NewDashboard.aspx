@@ -143,11 +143,7 @@
 
             });
         }
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 87cc1e9127a4fbbc91c0fbfcd1ba93dc609fdb69
 
         function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
             valnew = val;

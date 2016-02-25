@@ -359,20 +359,16 @@ namespace ChartsGenerator
                 foreach (var data in newdata)
                 {
                     var task = data;
-<<<<<<< HEAD
                     var color = _chartData.Where(x => x.Task == task).Select(x=>x.Color).FirstOrDefault();
                     html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
-=======
-                    var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
-                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
->>>>>>> 87cc1e9127a4fbbc91c0fbfcd1ba93dc609fdb69
+
                 }
             }
             else
             {
                 var selectedval = val.Split(',');
                 var newdata = _chartData.Where(x => !selectedval.Contains(x.Task)).Select(x => x.Task).Distinct();
-<<<<<<< HEAD
+
                     foreach (var data in newdata)
                     {
                         var task = data;
@@ -380,15 +376,7 @@ namespace ChartsGenerator
                         html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
                     }
                 
-=======
-                foreach (var data in newdata)
-                {
-                    var task = data;
-                    var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
-                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
-                }
 
->>>>>>> 87cc1e9127a4fbbc91c0fbfcd1ba93dc609fdb69
             }
             html = html + "</div>";
             return html;
