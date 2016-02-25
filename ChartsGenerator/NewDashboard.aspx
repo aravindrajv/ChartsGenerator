@@ -11,8 +11,8 @@
     <link href="Content/site.css" rel="stylesheet" />
     <link href="Content/bootstrap-datepicker.css" rel="stylesheet" />
     <script src="Scripts/bootstrap-datepicker.js"></script>
-    <%--<script type="text/javascript" src="https://www.google.com/jsapi"></script>--%>
-    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
+    <%--<script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>--%>
+    <script type="text/javascript" src="Scripts/loader.js"></script>
     <style>
         .charts {
             overflow-y: hidden;
@@ -31,6 +31,8 @@
         }
     </style>
     <script type="text/javascript">
+        var cData;
+        var valnew;
         function onLoad() {
             $("#Charts").html('');
             var sDate = $('#strtDate').val();
@@ -120,28 +122,28 @@
             });
 
             $("#LegendsDiv").html('');
-                $.ajax({
-                    url: "NewDashboard.aspx/GenerateLegends",
-                    data: '{"val":"' + selectedVal + '"}',
-                    dataType: "json",
-                    type: "POST",
-                    contentType: "application/json; chartset=utf-8",
-                    success: function (json) {
-                        $("#LegendsDiv").html(json.d);
-                        //  CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
+            $.ajax({
+                url: "NewDashboard.aspx/GenerateLegends",
+                data: '{"val":"' + selectedVal + '"}',
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; chartset=utf-8",
+                success: function (json) {
+                    $("#LegendsDiv").html(json.d);
+                    //  CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
 
-                    },
-                    error: function () {
-                        alert("Error loading data! Please try again.");
-                    }
-                }).done(function () {
+                },
+                error: function () {
+                    alert("Error loading data! Please try again.");
+                }
+            }).done(function () {
 
-                });
-            }
+            });
+        }
         
 
         function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
-            var cData;
+            valnew = val;
             $.ajax({
                 url: "NewDashboard.aspx/GetChartData",
                 //data: "",
@@ -151,7 +153,9 @@
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     cData = json.d;
-                    AddData(cData, val);
+                    //AddData(cData, val);
+                    google.charts.load('current', { 'packages': ['timeline'] });
+                    google.charts.setOnLoadCallback(AddData);
                 },
                 error: function () {
                     alert("Error loading data! Please try again.");
@@ -162,8 +166,8 @@
         }
 
 
-        function AddData(cData, val) {
-
+        function AddData() {
+            var val = valnew;
             var divName = val.replace(" ", "");
             $("#Charts").append("<br /><div id =" + divName + " class='charts' ></div><br />");
 
@@ -195,7 +199,7 @@
                     var emonth = eDate.getMonth();
                     var eday = eDate.getDate();
                     dataTable.addRows([
-                  [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                    [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
                     if (first) {
                         colors = val[6];
                         first = false;

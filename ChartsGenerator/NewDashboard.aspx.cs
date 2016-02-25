@@ -345,7 +345,7 @@ namespace ChartsGenerator
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GenerateLegends(string val)
         {
-            var html = "";
+            var html = "<div >";
             if (val == "")
             {
                 var newdata = _chartData.Select(x => x.Task).Distinct();
@@ -353,7 +353,7 @@ namespace ChartsGenerator
                 {
                     var task = data;
                     var color = _chartData.Where(x => x.Task == task).Select(x=>x.Color).FirstOrDefault();
-                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                    html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
                 }
             }
             else 
@@ -364,11 +364,11 @@ namespace ChartsGenerator
                     {
                         var task = data;
                         var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
-                        html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                        html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
                     }
                 
             }
-
+            html = html + "</div>";
             return html;
         }
     }

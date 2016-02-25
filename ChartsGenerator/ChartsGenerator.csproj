@@ -103,6 +103,7 @@
     <None Include="Properties\PublishProfiles\Dashboard.pubxml" />
     <Content Include="sample\template2.xlsx" />
     <Content Include="sample\template4.xlsx" />
+    <Content Include="sample\sampletemplateold.xlsx" />
     <Content Include="sample\sampletemplate.xlsx" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\bootstrap-datepicker.js" />
@@ -111,6 +112,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\jquery-2.2.0.js" />
     <Content Include="Scripts\jquery-2.2.0.min.js" />
+    <Content Include="Scripts\loader.js" />
     <Content Include="Scripts\locales\bootstrap-datepicker.ar.min.js" />
     <Content Include="Scripts\locales\bootstrap-datepicker.az.min.js" />
     <Content Include="Scripts\locales\bootstrap-datepicker.bg.min.js" />
