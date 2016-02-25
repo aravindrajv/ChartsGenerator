@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="NewDashboard.aspx.cs" Inherits="ChartsGenerator.NewDashboard" %>
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -18,10 +19,12 @@
             overflow-y: hidden;
             /*min-height: 400px;*/
         }
+
         .fields {
-            width: 130px;height: 25px;
+            width: 130px;
+            height: 25px;
         }
-        
+
         .ListBoxCssClass {
             width: 150px;
         }
@@ -120,25 +123,25 @@
             });
 
             $("#LegendsDiv").html('');
-                $.ajax({
-                    url: "NewDashboard.aspx/GenerateLegends",
-                    data: '{"val":"' + selectedVal + '"}',
-                    dataType: "json",
-                    type: "POST",
-                    contentType: "application/json; chartset=utf-8",
-                    success: function (json) {
-                        $("#LegendsDiv").html(json.d);
-                        //  CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
+            $.ajax({
+                url: "NewDashboard.aspx/GenerateLegends",
+                data: '{"val":"' + selectedVal + '"}',
+                dataType: "json",
+                type: "POST",
+                contentType: "application/json; chartset=utf-8",
+                success: function (json) {
+                    $("#LegendsDiv").html(json.d);
+                    //  CreateChart("chart", sDate, eDate, phase, fleet, task, vendor);
 
-                    },
-                    error: function () {
-                        alert("Error loading data! Please try again.");
-                    }
-                }).done(function () {
+                },
+                error: function () {
+                    alert("Error loading data! Please try again.");
+                }
+            }).done(function () {
 
-                });
-            }
-        
+            });
+        }
+
 
         function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
             var cData;
@@ -166,13 +169,14 @@
 
             var divName = val.replace(" ", "");
             $("#Charts").append("<br /><div id =" + divName + " class='charts' ></div><br />");
-
+            
             var container = document.getElementById(divName);
             var chart = new google.visualization.Timeline(container);
             var dataTable = new google.visualization.DataTable();
             //dataTable.addColumn({ type: 'string', id: 'Project' });
             dataTable.addColumn({ type: 'string', id: 'Phase' });
             dataTable.addColumn({ type: 'string', id: 'Task' });
+            //dataTable.addColumn({ type: 'string', id: 'Tooltip' });
             dataTable.addColumn({ type: 'date', id: 'Start Date' });
             dataTable.addColumn({ type: 'date', id: 'End Date' });
 
@@ -210,6 +214,8 @@
                 curveType: 'function',
                 height: 800,
                 colors: colors.split(','),
+                timeline: { showBarLabels: false },
+                
             };
 
             chart.draw(dataTable, options);
@@ -256,7 +262,7 @@
                 </div>
             </div>
             <a href="Home.aspx">Back</a>
-            
+
             <%--<div>
             <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging="PageIndexChanging" AllowPaging="true" Width="100%" Style="text-align: left; border-color: gray;">
                     <HeaderStyle BackColor="#158CBA" Font-Bold="true" ForeColor="White" />
@@ -265,61 +271,62 @@
         <br/>--%>
 
             <div>
-                <asp:Label style="color: red;" id="Error" runat="server" ></asp:Label>
+                <asp:Label Style="color: red;" ID="Error" runat="server"></asp:Label>
             </div>
-            <br/>
-            
-            <div style="background-color: #E6E6E6; padding-top: 10px;padding-bottom: 10px;padding-left: 9px; border-radius: 10px;">
+            <br />
+
+            <div style="background-color: #E6E6E6; padding-top: 10px; padding-bottom: 10px; padding-left: 9px; border-radius: 10px;">
                 <table id="FilterTable">
                     <tr>
                         <td style="width: 100px;">
-                            <br/>
+                            <br />
                             <span style="font-weight: bold;">Start Date :</span>
-                            <br/>
-                            <br/>
+                            <br />
+                            <br />
                             <span style="font-weight: bold;">End Date &nbsp;&nbsp;:</span>
                         </td>
                         <td style="width: 175px;">
-                            <br/>
+                            <br />
                             <input class="fields" id="strtDate" type="text" class="datepicker " />
-                            <br/><br/>
+                            <br />
+                            <br />
                             <input class="fields" id="endDate" type="text" class="datepicker " />
                         </td>
                         <td style="width: 175px;">
                             <span style="font-weight: bold;">Vendor : </span>
-                            <br/>
-                            <asp:ListBox  CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <br />
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td style="width: 175px;">
                             <span style="font-weight: bold;">Fleet : </span>
-                            <br/>
+                            <br />
                             <asp:ListBox CssClass="ListBoxCssClass" ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td style="width: 175px;">
                             <span style="font-weight: bold;">Release : </span>
-                            <br/>
+                            <br />
                             <asp:ListBox CssClass="ListBoxCssClass" ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td style="width: 175px;">
                             <span style="font-weight: bold;">Exclude Task : </span>
-                            <br/>
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple"  />
+                            <br />
+                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
                         <td style="width: 175px;">
-                            <br/>
+                            <br />
                             <input id="BtnSubmit" type="button" class="btn-primary btncustom" value="Create Chart" onclick="onLoad();" />
-                            <br/>
-                            <br/>
+                            <br />
+                            <br />
                             <input id="ClearBtn" type="button" class="btn-primary btncustom" value="Clear Filters" onclick="clearfilters();" />
                         </td>
                     </tr>
                 </table>
             </div>
-            <br/>
-            <div style="background-color: #E6E6E6; padding-top: 10px;padding-bottom: 10px;padding-left: 9px; border-radius: 10px;">
-                <div id="LegendsDiv" >
-            </div>
+            <br />
+            <div style="background-color: #E6E6E6; padding-top: 10px; padding-bottom: 10px; padding-left: 9px; border-radius: 10px;">
+                <div id="LegendsDiv">
                 </div>
+            </div>
             <div>
                 <div id="Charts"></div>
             </div>
