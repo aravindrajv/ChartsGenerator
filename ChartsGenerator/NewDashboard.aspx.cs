@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.OleDb;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI.WebControls;
 using System.Web.Script.Services;
@@ -32,7 +33,7 @@ namespace ChartsGenerator
                         var _cData = ConvertExcelToDataTable(filepath, "Data");
 
                         var colorDataTable = ConvertExcelToDataTable(filepath, "Color");
-                         var colors = (from DataRow row in colorDataTable.Rows
+                        var colors = (from DataRow row in colorDataTable.Rows
                                       select new ColorData()
                                       {
                                           Color = row["Color"].ToString(),
@@ -178,7 +179,7 @@ namespace ChartsGenerator
             List<ChartData> tempData;
 
             if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
-                && fleets.Length == 0 && phases.Length == 0 && vendors.Length == 0)
+                && fleets.Length == 0 && phases.Length == 0 && tasks.Length == 0 && vendors.Length == 0)
                 tempData = _chartData;
             else
             {
@@ -208,6 +209,12 @@ namespace ChartsGenerator
             var date = tempData.OrderBy(x => x.StartDate).Select(x => x.StartDate).Distinct().FirstOrDefault();
 
             var newdata = new List<ChartData>();
+            
+            var maxLength = tempData.Select(x => x.Phase).Distinct().ToList().Select(x => x.Length).Concat(new[] { 0 }).Max();
+            var sb = new StringBuilder();
+            for (var i = 0; i < maxLength; i++)
+                sb.Append("..");
+
             foreach (var project in tempData.Select(x => x.Project).Distinct().ToList())
             {
                 var projectData = tempData.Where(x => x.Project == project).ToList();
@@ -218,7 +225,7 @@ namespace ChartsGenerator
                 {
                     StartDate = date,
                     EndDate = date.AddHours(4),
-                    Phase = project + ".......................",
+                    Phase = project + sb + "....",
                     Project = project,
                     Task = "",
                     Fleet = "",
@@ -352,14 +359,20 @@ namespace ChartsGenerator
                 foreach (var data in newdata)
                 {
                     var task = data;
+<<<<<<< HEAD
                     var color = _chartData.Where(x => x.Task == task).Select(x=>x.Color).FirstOrDefault();
                     html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+=======
+                    var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
+                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+>>>>>>> 87cc1e9127a4fbbc91c0fbfcd1ba93dc609fdb69
                 }
             }
-            else 
+            else
             {
                 var selectedval = val.Split(',');
                 var newdata = _chartData.Where(x => !selectedval.Contains(x.Task)).Select(x => x.Task).Distinct();
+<<<<<<< HEAD
                     foreach (var data in newdata)
                     {
                         var task = data;
@@ -367,6 +380,15 @@ namespace ChartsGenerator
                         html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
                     }
                 
+=======
+                foreach (var data in newdata)
+                {
+                    var task = data;
+                    var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
+                    html = html + "<span title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                }
+
+>>>>>>> 87cc1e9127a4fbbc91c0fbfcd1ba93dc609fdb69
             }
             html = html + "</div>";
             return html;
