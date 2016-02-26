@@ -350,32 +350,118 @@ namespace ChartsGenerator
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public static object GenerateLegends(string val)
+        public static object GenerateLegends(string val, string sDate, string eDate, string fleet, string phase, string task, string vendor)
         {
+            fleet = fleet ?? "";
+            phase = phase ?? "";
+            vendor = vendor ?? "";
+            task = task ?? "";
+
+            var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var tasks = task.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            List<ChartData> tempData;
+
+            if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
+                && fleets.Length == 0 && phases.Length == 0 && tasks.Length == 0 && vendors.Length == 0)
+                tempData = _chartData;
+            else
+            {
+                tempData = _chartData;
+                if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
+                {
+                    var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                    var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+
+                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                }
+
+                if (fleets.Length > 0)
+                    tempData = tempData.Where(x => fleets.Contains(x.Project)).ToList();
+
+                if (phases.Length > 0)
+                    tempData = tempData.Where(x => phases.Contains(x.Phase)).ToList();
+
+                if (vendors.Length > 0)
+                    tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
+
+                if (tasks.Length > 0)
+                    tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
+            }
+
             var html = "<div >";
+            var i = 0;
             if (val == "")
             {
-                var newdata = _chartData.Select(x => x.Task).Distinct();
+                var newdata = tempData.Select(x => x.Task).Distinct();
+                html = html + "<table>";
+                html = html + "<tr>";
+                i = 1;
                 foreach (var data in newdata)
                 {
-                    var task = data;
-                    var color = _chartData.Where(x => x.Task == task).Select(x=>x.Color).FirstOrDefault();
-                    html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                    if (i <= 6)
+                    {
+                        var etask = data;
+                        var color = tempData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
+                        html = html + "<td><span style='display:inline-block;' title='" + etask +
+                               "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
+                               "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                    }
+                    else
+                    {
+                        html = html + "</tr><tr>";
+                        i = 1;
+                    }
+                    i = i + 1;
 
                 }
+                if (i < 6)
+                {
+                    for (var j = i; j == 6; j++)
+                    {
+                        html = html + "<td></td>";
+                    }
+                }
+                html = html + "</tr>";
+                html = html + "</table>";
             }
             else
             {
                 var selectedval = val.Split(',');
-                var newdata = _chartData.Where(x => !selectedval.Contains(x.Task)).Select(x => x.Task).Distinct();
-
-                    foreach (var data in newdata)
+                var newdata = tempData.Where(x => !selectedval.Contains(x.Task)).Select(x => x.Task).Distinct();
+                html = html + "<table>";
+                html = html + "<tr>";
+                i = 1;
+                foreach (var data in newdata)
+                {
+                    if (i <= 6)
                     {
-                        var task = data;
-                        var color = _chartData.Where(x => x.Task == task).Select(x => x.Color).FirstOrDefault();
-                        html = html + "<span style='display:inline-block;' title='" + task + "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color + "' /></svg> " + task + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+                        var etask = data;
+                        var color = tempData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
+                        html = html + "<td><span style='display:inline-block;' title='" + etask +
+                               "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
+                               "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
                     }
-                
+                    else
+                    {
+                        html = html + "</tr><tr>";
+                        i = 1;
+                    }
+                    i = i + 1;
+                }
+
+                if (i < 6)
+                {
+                    for (var j = i; j == 6; j++)
+                    {
+                        html = html + "<td></td>";
+                    }
+                }
+                html = html + "</tr>";
+                html = html + "</table>";
+
 
             }
             html = html + "</div>";

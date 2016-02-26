@@ -12,8 +12,8 @@
     <link href="Content/site.css" rel="stylesheet" />
     <link href="Content/bootstrap-datepicker.css" rel="stylesheet" />
     <script src="Scripts/bootstrap-datepicker.js"></script>
-    <%--<script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>--%>
-    <script type="text/javascript" src="Scripts/loader.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
+    <%--<script type="text/javascript" src="Scripts/loader.js"></script>--%>
     <style>
         .charts {
             overflow-y: hidden;
@@ -118,6 +118,15 @@
         }
 
         function GenerateLegends() {
+
+            var sDate = $('#strtDate').val();
+            var eDate = $('#endDate').val();
+            //var selected = $("[id*=ListBox1] option:selected");
+            var fleet = $('#lstFleet').val();
+            var phase = $('#lstPhase').val();
+            var vendor = $('#lstVendor').val();
+            var task = $('#lstTasks').val();
+
             var selectedVal = [];
             $('#lstTasks :selected').each(function (i, selected) {
                 selectedVal[i] = $(selected).text();
@@ -127,7 +136,7 @@
             $("#LegendsDiv").html('');
             $.ajax({
                 url: "NewDashboard.aspx/GenerateLegends",
-                data: '{"val":"' + selectedVal + '"}',
+                data: '{"val":"' + selectedVal + '", "sDate":"' + sDate + '", "eDate":"' + eDate + '","fleet":"' + fleet + '", "phase":"' + phase + '", "task":"' + task + '", "vendor":"' + vendor + '"}',
                 dataType: "json",
                 type: "POST",
                 contentType: "application/json; chartset=utf-8",
@@ -146,7 +155,7 @@
 
 
         function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
-            valnew = val;
+            //valnew = val;
             $.ajax({
                 url: "NewDashboard.aspx/GetChartData",
                 //data: "",
@@ -156,9 +165,9 @@
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     cData = json.d;
-                    //AddData(cData, val);
-                    google.charts.load('current', { 'packages': ['timeline'] });
-                    google.charts.setOnLoadCallback(AddData);
+                    AddData(cData, val);
+                    //google.charts.load('current', { 'packages': ['timeline'] });
+                    //google.charts.setOnLoadCallback(AddData);
                 },
                 error: function () {
                     alert("Error loading data! Please try again.");
@@ -169,8 +178,8 @@
         }
 
 
-        function AddData() {
-            var val = valnew;
+        function AddData(cData, val) {
+            //var val = valnew;
             var divName = val.replace(" ", "");
             $("#Charts").append("<br /><div id =" + divName + " class='charts' ></div><br />");
             
