@@ -75,8 +75,8 @@
         function clearfilters() {
             $("#Charts").html('');
 
-            $('#strtDate').val();
-            $('#endDate').val();
+            $('#strtDate').val("");
+            $('#endDate').val("");
             $("#lstFleet").val([]);
             $("#lstPhase").val([]);
             $("#lstVendor").val([]);
@@ -244,8 +244,15 @@
     <%--Filter--%>
     <script>
         $(document).ready(function () {
+            strtDate();
+            endDate();
+        });
+
+        function strtDate() {
             var nowTemp = new Date();
             var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+
+
             var checkout = $('#strtDate').datepicker({
                 onRender: function (date) {
                     return date.valueOf() > now.valueOf() ? 'disabled' : '';
@@ -253,15 +260,22 @@
             }).on('changeDate', function (ev) {
                 checkout.hide();
             }).data('datepicker');
+        }
 
-            checkout = $('#endDate').datepicker({
+        function endDate() {
+            var nowTemp = new Date();
+            var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+
+
+            var checkout = $('#endDate').datepicker({
                 onRender: function (date) {
                     return date.valueOf() > now.valueOf() ? 'disabled' : '';
                 }
             }).on('changeDate', function (ev) {
                 checkout.hide();
             }).data('datepicker');
-        });
+
+        }
 
 
     </script>
@@ -269,12 +283,15 @@
 <body>
     <form runat="server">
         <div class="container ">
-            <div class="navbar navbar-default" style="text-align: center;">
-                <div>
-                    &nbsp;Dashboard
-                </div>
+            <div class="navbar navbar-default" >
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 30px; font-weight: normal; font-size: 13px;"><a href="Home.aspx">Back</a></td>
+                        <td style="width: 1110px; text-align: center;">Dashboard</td>
+                    </tr>
+                </table>
             </div>
-            <a href="Home.aspx">Back</a>
+            <%--<a href="Home.aspx">Back</a>--%>
 
             <%--<div>
             <asp:GridView ID="grvExcelData" runat="server" OnPageIndexChanging="PageIndexChanging" AllowPaging="true" Width="100%" Style="text-align: left; border-color: gray;">
@@ -283,11 +300,7 @@
             </div>
         <br/>--%>
 
-            <div>
-                <asp:Label Style="color: red;" ID="Error" runat="server"></asp:Label>
-            </div>
-            <br />
-
+            
             <div style="background-color: #E6E6E6; padding-top: 10px; padding-bottom: 10px; padding-left: 9px; border-radius: 10px;">
                 <table id="FilterTable">
                     <tr>
@@ -343,6 +356,11 @@
             <div>
                 <div id="Charts"></div>
             </div>
+            
+            <div>
+                <asp:Label Style="color: red;" ID="Error" runat="server"></asp:Label>
+            </div>
+            <br />
 
         </div>
     </form>

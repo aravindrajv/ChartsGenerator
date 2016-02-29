@@ -5,6 +5,10 @@ body
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.navbar {
+    min-height: 40px;
+}
+
 .body-content
 {
     padding-left: 15px;
