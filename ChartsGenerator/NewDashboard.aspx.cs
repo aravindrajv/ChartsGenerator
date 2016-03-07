@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Odbc;
 using System.Data.OleDb;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -10,6 +12,8 @@ using System.Web.UI.WebControls;
 using System.Web.Script.Services;
 using System.Web.Services;
 using ChartsGenerator.Model;
+using Microsoft.Office.Interop.Excel;
+using DataTable = System.Data.DataTable;
 
 namespace ChartsGenerator
 {
@@ -32,7 +36,7 @@ namespace ChartsGenerator
                         var filepath = HttpContext.Current.Session["FPath"].ToString();
                         var _cData = ConvertExcelToDataTable(filepath, "Data");
 
-                        var colorDataTable = ConvertExcelToDataTable(filepath, "Color");
+                        var colorDataTable = ConvertExcelToDataTable(filepath, "ColorCodes");
                         var colors = (from DataRow row in colorDataTable.Rows
                                       select new ColorData()
                                       {
@@ -272,41 +276,82 @@ namespace ChartsGenerator
             }
         }
 
-        public static DataTable ConvertExcelToDataTable(string fileName, string sheetName)
+        private DataTable ConvertExcelToDataTable(string fileName, string sheetName)
         {
-            using (var objConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + fileName + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';"))
+            DataTable dt = null;
+            try
             {
-                objConn.Open();
-                var cmd = new OleDbCommand();
-                var ds = new DataSet();
-                var dt = objConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
-                if (dt != null)
+                object rowIndex = 1;
+                dt = new DataTable();
+                DataRow row;
+                var app = new Application();
+                var workBook = app.Workbooks.Open(fileName, 0, true, 5, "", "", true,
+                    XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+                var workSheet = (Worksheet)app.Worksheets[sheetName];
+                int temp = 1;
+                while (((Range)workSheet.Cells[rowIndex, temp]).Value2 != null)
                 {
-                    var tempDataTable = (from dataRow in dt.AsEnumerable()
-                                         where !dataRow["TABLE_NAME"].ToString().Contains("FilterDatabase")
-                                         select dataRow).CopyToDataTable();
-                    dt = tempDataTable;
-                    var totalSheet = dt.Rows.Count; //No of sheets on excel file  
-                    for (var i = 0; i < totalSheet; i++)
+                    dt.Columns.Add(Convert.ToString(((Range)workSheet.Cells[rowIndex, temp]).Value2));
+                    temp++;
+                }
+                rowIndex = Convert.ToInt32(rowIndex) + 1;
+                int columnCount = temp;
+                temp = 1;
+                while (((Range)workSheet.Cells[rowIndex, temp]).Value2 != null)
+                {
+                    row = dt.NewRow();
+                    for (int i = 1; i < columnCount; i++)
                     {
-                        var name = dt.Rows[i]["TABLE_NAME"].ToString();
-
-                        if (name.Contains(sheetName))
+                        if (i == 6 || i == 7)
                         {
-                            sheetName = name;
-                            break;
+
+                            DateTime datetime = DateTime.Parse(ConvertToDateTime(Convert.ToString(((Range)workSheet.Cells[rowIndex, i]).Value2)));
+                            var date = datetime.Date;
+                            row[i - 1] = date;
+                        }
+                        else
+                        {
+                            row[i - 1] = Convert.ToString(((Range)workSheet.Cells[rowIndex, i]).Value2);
                         }
                     }
+                    dt.Rows.Add(row);
+                    rowIndex = Convert.ToInt32(rowIndex) + 1;
+                    temp = 1;
                 }
-                cmd.Connection = objConn;
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
-                var oleda = new OleDbDataAdapter(cmd);
-                oleda.Fill(ds, "excelData");
-                var dtResult = ds.Tables["excelData"];
-                objConn.Close();
-                return dtResult; //Returning Dattable  
+                app.Workbooks.Close();
             }
+            catch (Exception ex)
+            {
+                //lblError.Text = ex.Message;
+            }
+            return dt;
+        }
+
+        public static string ConvertToDateTime(string strExcelDate)
+        {
+            double excelDate;
+            try
+            {
+                excelDate = Convert.ToDouble(strExcelDate);
+            }
+            catch
+            {
+                return strExcelDate;
+            }
+            if (excelDate < 1)
+            {
+                throw new ArgumentException("Excel dates cannot be smaller than 0.");
+            }
+            DateTime dateOfReference = new DateTime(1900, 1, 1);
+            if (excelDate > 60d)
+            {
+                excelDate = excelDate - 2;
+            }
+            else
+            {
+                excelDate = excelDate - 1;
+            }
+            return dateOfReference.AddDays(excelDate).ToShortDateString();
         }
 
         public void ImportToGrid()
@@ -346,8 +391,7 @@ namespace ChartsGenerator
             //grvExcelData.PageIndex = e.NewPageIndex;
             //grvExcelData.DataBind();
         }
-
-
+        
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GenerateLegends(string val, string sDate, string eDate, string fleet, string phase, string task, string vendor)
@@ -408,13 +452,14 @@ namespace ChartsGenerator
                         html = html + "<td><span style='display:inline-block;' title='" + etask +
                                "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
                                "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                        i = i + 1;
                     }
                     else
                     {
                         html = html + "</tr><tr>";
                         i = 1;
                     }
-                    i = i + 1;
+                    
 
                 }
                 if (i < 6)
@@ -443,13 +488,14 @@ namespace ChartsGenerator
                         html = html + "<td><span style='display:inline-block;' title='" + etask +
                                "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
                                "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                        i = i + 1;
                     }
                     else
                     {
                         html = html + "</tr><tr>";
                         i = 1;
                     }
-                    i = i + 1;
+                    
                 }
 
                 if (i < 6)
