@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
-using System.Data.Odbc;
 using System.Data.OleDb;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -12,7 +11,6 @@ using System.Web.UI.WebControls;
 using System.Web.Script.Services;
 using System.Web.Services;
 using ChartsGenerator.Model;
-using Microsoft.Office.Interop.Excel;
 using DataTable = System.Data.DataTable;
 
 namespace ChartsGenerator
@@ -276,82 +274,64 @@ namespace ChartsGenerator
             }
         }
 
-        private DataTable ConvertExcelToDataTable(string fileName, string sheetName)
+        public static DataTable ConvertExcelToDataTable(string fileName, string sheetName)
         {
-            DataTable dt = null;
-            try
+            using (var objConn = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + fileName + ";Extended Properties='Excel 12.0;HDR=YES;IMEX=1;';"))
             {
-                object rowIndex = 1;
-                dt = new DataTable();
-                DataRow row;
-                var app = new Application();
-                var workBook = app.Workbooks.Open(fileName, 0, true, 5, "", "", true,
-                    XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
-                var workSheet = (Worksheet)app.Worksheets[sheetName];
-                int temp = 1;
-                while (((Range)workSheet.Cells[rowIndex, temp]).Value2 != null)
+                objConn.Open();
+                var cmd = new OleDbCommand();
+                var dtable = new DataTable();
+                var dt = objConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+                if (dt != null)
                 {
-                    dt.Columns.Add(Convert.ToString(((Range)workSheet.Cells[rowIndex, temp]).Value2));
-                    temp++;
-                }
-                rowIndex = Convert.ToInt32(rowIndex) + 1;
-                int columnCount = temp;
-                temp = 1;
-                while (((Range)workSheet.Cells[rowIndex, temp]).Value2 != null)
-                {
-                    row = dt.NewRow();
-                    for (int i = 1; i < columnCount; i++)
+                    var tempDataTable = (from dataRow in dt.AsEnumerable()
+                                         where !dataRow["TABLE_NAME"].ToString().Contains("FilterDatabase")
+                                         select dataRow).CopyToDataTable();
+                    dt = tempDataTable;
+                    var totalSheet = dt.Rows.Count; //No of sheets on excel file  
+                    for (var i = 0; i < totalSheet; i++)
                     {
-                        if (i == 6 || i == 7)
-                        {
+                        var name = dt.Rows[i]["TABLE_NAME"].ToString();
 
-                            DateTime datetime = DateTime.Parse(ConvertToDateTime(Convert.ToString(((Range)workSheet.Cells[rowIndex, i]).Value2)));
-                            var date = datetime.Date;
-                            row[i - 1] = date;
-                        }
-                        else
+                        if (name.Contains(sheetName))
                         {
-                            row[i - 1] = Convert.ToString(((Range)workSheet.Cells[rowIndex, i]).Value2);
+                            sheetName = name;
+                            break;
                         }
                     }
-                    dt.Rows.Add(row);
-                    rowIndex = Convert.ToInt32(rowIndex) + 1;
-                    temp = 1;
                 }
-                app.Workbooks.Close();
-            }
-            catch (Exception ex)
-            {
-                //lblError.Text = ex.Message;
-            }
-            return dt;
-        }
+                cmd.Connection = objConn;
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT * FROM [" + sheetName + "]";
 
-        public static string ConvertToDateTime(string strExcelDate)
-        {
-            double excelDate;
-            try
-            {
-                excelDate = Convert.ToDouble(strExcelDate);
+                var oleda = new OleDbDataAdapter(cmd);
+                oleda.FillSchema(dtable, SchemaType.Source);
+
+                foreach (DataColumn cl in dtable.Columns)
+                {
+                    if (cl.DataType == typeof(double))
+                        cl.DataType = typeof(decimal);
+                    if (cl.ColumnName.ToUpper().Contains("AMT"))
+                        cl.DataType = typeof(decimal);
+                    if (cl.ColumnName.ToUpper().Contains("DATE"))
+                        cl.DataType = typeof(DateTime);
+                }
+
+                foreach (DataRow dr in dtable.Rows)
+                {
+                    foreach (DataColumn dc in dtable.Columns)
+                    {
+                        if (dc.ColumnName.ToUpper().Contains("DATE"))
+                        {
+                            dr[dc.ColumnName] = DateTime.ParseExact(dr[dc.ColumnName].ToString(), "dd-MM-yyyy", new CultureInfo(ConfigurationManager.AppSettings["CultureInfo"].ToString()));
+                        }
+                    }
+                }
+
+                oleda.Fill(dtable);
+                objConn.Close();
+                return dtable;   
             }
-            catch
-            {
-                return strExcelDate;
-            }
-            if (excelDate < 1)
-            {
-                throw new ArgumentException("Excel dates cannot be smaller than 0.");
-            }
-            DateTime dateOfReference = new DateTime(1900, 1, 1);
-            if (excelDate > 60d)
-            {
-                excelDate = excelDate - 2;
-            }
-            else
-            {
-                excelDate = excelDate - 1;
-            }
-            return dateOfReference.AddDays(excelDate).ToShortDateString();
         }
 
         public void ImportToGrid()
