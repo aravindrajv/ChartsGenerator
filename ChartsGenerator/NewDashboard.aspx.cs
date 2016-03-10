@@ -139,7 +139,7 @@ namespace ChartsGenerator
                     var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
                     var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                    tempData = tempData.Where(x => x.EndDate >= startDate && x.EndDate <= endDate).ToList();
                 }
 
                 if (fleets.Length > 0)
@@ -191,7 +191,7 @@ namespace ChartsGenerator
                     var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
                     var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                    tempData = tempData.Where(x => x.EndDate >= startDate && x.EndDate <= endDate).ToList();
                 }
 
                 if (fleets.Length > 0)
@@ -211,7 +211,7 @@ namespace ChartsGenerator
             var date = tempData.OrderBy(x => x.StartDate).Select(x => x.StartDate).Distinct().FirstOrDefault();
 
             var newdata = new List<ChartData>();
-            
+
             var maxLength = tempData.Select(x => x.Phase).Distinct().ToList().Select(x => x.Length).Concat(new[] { 0 }).Max();
             var sb = new StringBuilder();
             for (var i = 0; i < maxLength; i++)
@@ -330,7 +330,7 @@ namespace ChartsGenerator
 
                 oleda.Fill(dtable);
                 objConn.Close();
-                return dtable;   
+                return dtable;
             }
         }
 
@@ -371,15 +371,23 @@ namespace ChartsGenerator
             //grvExcelData.PageIndex = e.NewPageIndex;
             //grvExcelData.DataBind();
         }
-        
+
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GenerateLegends(string val, string sDate, string eDate, string fleet, string phase, string task, string vendor)
         {
-            fleet = fleet ?? "";
-            phase = phase ?? "";
-            vendor = vendor ?? "";
-            task = task ?? "";
+            val = "null";
+            fleet = "null";
+            phase = "null";
+            vendor = "null";
+            task = "null";
+            eDate = "";
+            sDate = "";
+
+            //fleet = fleet ?? "";
+            //phase = phase ?? "";
+            //vendor = vendor ?? "";
+            //task = task ?? "";
 
             var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -439,7 +447,7 @@ namespace ChartsGenerator
                         html = html + "</tr><tr>";
                         i = 1;
                     }
-                    
+
 
                 }
                 if (i < 6)
@@ -475,7 +483,7 @@ namespace ChartsGenerator
                         html = html + "</tr><tr>";
                         i = 1;
                     }
-                    
+
                 }
 
                 if (i < 6)
