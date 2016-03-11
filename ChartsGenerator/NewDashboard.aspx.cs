@@ -141,7 +141,7 @@ namespace ChartsGenerator
                     var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
                     var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                    tempData = tempData.Where(x => x.EndDate >= startDate && x.EndDate <= endDate).ToList();
+                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
                 }
 
                 if (fleets.Length > 0)
@@ -193,7 +193,7 @@ namespace ChartsGenerator
                     var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
                     var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                    tempData = tempData.Where(x => x.EndDate >= startDate && x.EndDate <= endDate).ToList();
+                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
                 }
 
                 if (fleets.Length > 0)
