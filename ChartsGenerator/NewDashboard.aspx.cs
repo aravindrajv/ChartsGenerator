@@ -429,38 +429,48 @@ namespace ChartsGenerator
             var i = 0;
             //if (val == "")
             //{
-                var newdata = _colorData.Select(x => x.Task).Distinct();
-                html = html + "<table>";
-                html = html + "<tr>";
-                i = 1;
-                foreach (var data in newdata)
+            var newdata = _colorData.Select(x => x.Task).Distinct();
+            html = html + "<table>";
+            html = html + "<tr>";
+            i = 1;
+            const int noOfCols = 5;
+            foreach (var data in newdata)
+            {
+                if (string.IsNullOrWhiteSpace(data))
+                    continue;
+
+                if (i <= noOfCols)
                 {
-                    if (i <= 6)
-                    {
-                        var etask = data;
-                        var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
-                        html = html + "<td><span style='display:inline-block;' title='" + etask +
-                               "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
-                               "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
-                        i = i + 1;
-                    }
-                    else
-                    {
-                        html = html + "</tr><tr>";
-                        i = 1;
-                    }
+                    var etask = data;
+                    var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
+                    html = html + "<td><span style='display:inline-block;' title='" + etask +
+                           "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
+                           "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                    i = i + 1;
+                }
+                else
+                {
+                    var etask = data;
+                    var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
+                    html = html + "<td><span style='display:inline-block;' title='" + etask +
+                           "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
+                           "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+
+                    html = html + "</tr><tr>";
+                    i = 1;
+                }
 
 
-                }
-                if (i < 6)
+            }
+            if (i < noOfCols)
+            {
+                for (var j = i; j == noOfCols; j++)
                 {
-                    for (var j = i; j == 6; j++)
-                    {
-                        html = html + "<td></td>";
-                    }
+                    html = html + "<td></td>";
                 }
-                html = html + "</tr>";
-                html = html + "</table>";
+            }
+            html = html + "</tr>";
+            html = html + "</table>";
             //}
             //else
             //{
