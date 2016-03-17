@@ -19,6 +19,7 @@ namespace ChartsGenerator.Model
 
     public class ColorData
     {
+        public int No { get; set; }
         public string Task { get; set; }
         public string Color { get; set; }
     }

@@ -425,12 +425,12 @@ namespace ChartsGenerator
             //        tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
             //}
 
-            var html = "<div >";
+            var html = "";
             var i = 0;
             //if (val == "")
             //{
             var newdata = _colorData.Select(x => x.Task).Distinct();
-            html = html + "<table>";
+            html = html + "<table class='' style='border-collapse: collapse;'><tbody>";
             html = html + "<tr>";
             i = 1;
             const int noOfCols = 5;
@@ -443,18 +443,18 @@ namespace ChartsGenerator
                 {
                     var etask = data;
                     var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
-                    html = html + "<td><span style='display:inline-block;' title='" + etask +
+                    html = html + "<td style='border-top: none !important;'><span style='display:inline-block;white-space: nowrap;' title='" + etask +
                            "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
-                           "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                           "' /></svg> " + etask + "&nbsp;&nbsp;</span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
                     i = i + 1;
                 }
                 else
                 {
                     var etask = data;
                     var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
-                    html = html + "<td><span style='display:inline-block;' title='" + etask +
+                    html = html + "<td style='border-top: none !important;'><span style='display:inline-block;white-space: nowrap;' title='" + etask +
                            "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
-                           "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                           "' /></svg> " + etask + "&nbsp;&nbsp;</span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
 
                     html = html + "</tr><tr>";
                     i = 1;
@@ -466,10 +466,10 @@ namespace ChartsGenerator
             {
                 for (var j = i; j == noOfCols; j++)
                 {
-                    html = html + "<td></td>";
+                    html = html + "<td style='border-top: none !important;'></td>";
                 }
             }
-            html = html + "</tr>";
+            html = html + "</tr></tbody>";
             html = html + "</table>";
             //}
             //else
@@ -510,7 +510,7 @@ namespace ChartsGenerator
 
 
             //}
-            html = html + "</div>";
+            html = html + "";
             return html;
         }
     }

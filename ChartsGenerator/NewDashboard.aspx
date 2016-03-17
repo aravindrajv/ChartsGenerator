@@ -15,10 +15,10 @@
     <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
     <%--<script type="text/javascript" src="Scripts/loader.js"></script>--%>
     <style>
-        .charts {
-            overflow-y: hidden;
-            /*min-height: 400px;*/
-        }
+          .charts {
+             overflow-y: hidden;
+             /*min-height: 400px;*/
+         }
 
         .fields {
             width: 130px;
@@ -301,44 +301,46 @@
         <br/>--%>
 
             
-            <div style="background-color: #E6E6E6; padding-top: 10px; padding-bottom: 10px; padding-left: 9px; border-radius: 10px;">
-                <table id="FilterTable">
-                    <tr>
-                        <td style="width: 100px;">
+            <div >
+                <div class="table-responsive" style="border-color: #E6E6E6;background-color: #E6E6E6;border-radius: 10px;">
+                    <table class="table" style="border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                        <td style="" >
                             <br />
-                            <span style="font-weight: bold;">Start Date :</span>
+                            <span style="font-weight: bold;white-space: nowrap;">Start Date :</span>
                             <br />
                             <br />
-                            <span style="font-weight: bold;">End Date &nbsp;&nbsp;:</span>
+                            <span style="font-weight: bold;white-space: nowrap;">End Date &nbsp;&nbsp;:</span>
                         </td>
-                        <td style="width: 175px;">
+                        <td >
                             <br />
                             <input class="fields" id="strtDate" type="text" class="datepicker " />
                             <br />
                             <br />
                             <input class="fields" id="endDate" type="text" class="datepicker " />
                         </td>
-                        <td style="width: 175px;">
+                        <td >
                             <span style="font-weight: bold;">Vendor : </span>
                             <br />
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox CssClass="ListBoxCssClass"  ID="lstVendor" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td style="width: 175px;">
+                        <td >
                             <span style="font-weight: bold;">Fleet : </span>
                             <br />
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox  CssClass="ListBoxCssClass" ID="lstFleet" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td style="width: 175px;">
+                        <td >
                             <span style="font-weight: bold;">Release : </span>
                             <br />
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox  CssClass="ListBoxCssClass" ID="lstPhase" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td style="width: 175px;">
+                        <td >
                             <span style="font-weight: bold;">Exclude Task : </span>
                             <br />
-                            <asp:ListBox CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
+                            <asp:ListBox  CssClass="ListBoxCssClass" ID="lstTasks" runat="server" ClientIDMode="Static" SelectionMode="Multiple" />
                         </td>
-                        <td style="width: 175px;">
+                        <td >
                             <br />
                             <input id="BtnSubmit" type="button" class="btn-primary btncustom" value="Create Chart" onclick="onLoad();" />
                             <br />
@@ -346,11 +348,13 @@
                             <input id="ClearBtn" type="button" class="btn-primary btncustom" value="Clear Filters" onclick="clearfilters();" />
                         </td>
                     </tr>
+                    </tbody>
                 </table>
+                </div>
             </div>
             <br />
-            <div style="background-color: #E6E6E6; padding-top: 10px; padding-bottom: 10px; padding-left: 9px; border-radius: 10px;">
-                <div id="LegendsDiv">
+            <div >
+                <div id="LegendsDiv"   class="table-responsive" style="border-color: #E6E6E6;background-color: #E6E6E6;border-radius: 10px;padding-top: 5px;padding-bottom: 5px;padding-left: 5px;padding-right: 5px;">
                 </div>
             </div>
             <div>
