@@ -12,8 +12,8 @@
     <link href="Content/site.css" rel="stylesheet" />
     <link href="Content/bootstrap-datepicker.css" rel="stylesheet" />
     <script src="Scripts/bootstrap-datepicker.js"></script>
-    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>
-    <%--<script type="text/javascript" src="Scripts/loader.js"></script>--%>
+    <%--<script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['timeline']}]}"></script>--%>
+    <script type="text/javascript" src="Scripts/loader.js"></script>
     <style>
           .charts {
              overflow-y: hidden;
@@ -36,7 +36,11 @@
     <script type="text/javascript">
         var cData;
         var valnew;
+        google.charts.load('current', { 'packages': ['timeline'] });
+
         function onLoad() {
+            cData = null;
+            valnew = null;
             $("#Charts").html('');
             var sDate = $('#strtDate').val();
             var eDate = $('#endDate').val();
@@ -155,7 +159,7 @@
 
 
         function CreateChart(val, sDate, eDate, phase, fleet, task, vendor) {
-            //valnew = val;
+            valnew = val;
             $.ajax({
                 url: "NewDashboard.aspx/GetChartData",
                 //data: "",
@@ -165,9 +169,8 @@
                 contentType: "application/json; chartset=utf-8",
                 success: function (json) {
                     cData = json.d;
-                    AddData(cData, val);
-                    //google.charts.load('current', { 'packages': ['timeline'] });
-                    //google.charts.setOnLoadCallback(AddData);
+                    //AddData(cData, val);
+                    google.charts.setOnLoadCallback(AddData);
                 },
                 error: function () {
                     alert("Error loading data! Please try again.");
@@ -178,8 +181,9 @@
         }
 
 
-        function AddData(cData, val) {
-            //var val = valnew;
+        function AddData() {
+            var val = valnew;
+
             var divName = val.replace(" ", "");
             $("#Charts").append("<br /><div id =" + divName + " class='charts' ></div><br />");
             
@@ -189,10 +193,10 @@
             //dataTable.addColumn({ type: 'string', id: 'Project' });
             dataTable.addColumn({ type: 'string', id: 'Phase' });
             dataTable.addColumn({ type: 'string', id: 'Task' });
-            //dataTable.addColumn({ type: 'string', id: 'Tooltip' });
+            dataTable.addColumn({ 'type': 'string', 'role': 'tooltip', 'p': { 'html': true } });
             dataTable.addColumn({ type: 'date', id: 'Start Date' });
             dataTable.addColumn({ type: 'date', id: 'End Date' });
-
+            
 
             var colors = '';
             var first = true;
@@ -211,8 +215,7 @@
                     var eyear = eDate.getFullYear();
                     var emonth = eDate.getMonth();
                     var eday = eDate.getDate();
-                    dataTable.addRows([
-                    [val[5] + ' ' + val[1], val[2], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
+                    dataTable.addRows([[val[5] + ' ' + val[1], val[2], val[8], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
                     if (first) {
                         colors = val[6];
                         first = false;
@@ -228,7 +231,7 @@
                 height: 800,
                 colors: colors.split(','),
                 timeline: { showBarLabels: false },
-                
+                //tooltip : {isHtml:true}
             };
 
             chart.draw(dataTable, options);
@@ -368,5 +371,5 @@
 
         </div>
     </form>
-</body>
+    </body>
 </html>

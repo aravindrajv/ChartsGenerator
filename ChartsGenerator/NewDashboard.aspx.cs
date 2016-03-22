@@ -70,6 +70,11 @@ namespace ChartsGenerator
                                 Vendor = row["Vendor"].ToString(),
                                 Color = row["Color"].ToString()
                             };
+
+                            if (chartData.Task.Contains("EOI"))
+                            {
+                                Response.Write("");
+                            }
                             var color = _colorData.FirstOrDefault(x => x.Task == chartData.Task);
                             if (color != null)
                                 chartData.Color = color.Color;
@@ -251,12 +256,14 @@ namespace ChartsGenerator
                 "EndDate",
                 "Fleet",
                 "Color",
-                "Vendor"
+                "Vendor",
+                "Tooltip"
                 };
             foreach (var i in newdata)
             {
                 j++;
-                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet, i.Color, i.Vendor };
+                var tooltip = string.Format("<span style='width:300px; background-color:yellow;'>&nbsp;&nbsp;<b>{0}</b><br/>&nbsp;&nbsp;{1}&nbsp; to &nbsp;{2}</span>", i.Task, i.StartDate.ToString("MM/dd/yy"), i.EndDate.ToString("MM/dd/yy"));
+                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet, i.Color, i.Vendor , tooltip};
             }
             return chartData;
         }
@@ -378,57 +385,9 @@ namespace ChartsGenerator
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GenerateLegends(string val, string sDate, string eDate, string fleet, string phase, string task, string vendor)
         {
-            //val = "null";
-            //fleet = "null";
-            //phase = "null";
-            //vendor = "null";
-            //task = "null";
-            //eDate = "";
-            //sDate = "";
-
-            ////fleet = fleet ?? "";
-            ////phase = phase ?? "";
-            ////vendor = vendor ?? "";
-            ////task = task ?? "";
-
-            //var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            //var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            //var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            //var tasks = task.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-            //List<ChartData> tempData;
-
-            //if ((string.IsNullOrWhiteSpace(sDate) || string.IsNullOrWhiteSpace(eDate))
-            //    && fleets.Length == 0 && phases.Length == 0 && tasks.Length == 0 && vendors.Length == 0)
-            //    tempData = _chartData;
-            //else
-            //{
-            //    tempData = _chartData;
-            //    if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
-            //    {
-            //        var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
-            //        var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
-
-            //        tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
-            //    }
-
-            //    if (fleets.Length > 0)
-            //        tempData = tempData.Where(x => fleets.Contains(x.Project)).ToList();
-
-            //    if (phases.Length > 0)
-            //        tempData = tempData.Where(x => phases.Contains(x.Phase)).ToList();
-
-            //    if (vendors.Length > 0)
-            //        tempData = tempData.Where(x => vendors.Contains(x.Vendor)).ToList();
-
-            //    if (tasks.Length > 0)
-            //        tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
-            //}
-
             var html = "";
             var i = 0;
-            //if (val == "")
-            //{
+
             var newdata = _colorData.Select(x => x.Task).Distinct();
             html = html + "<table class='' style='border-collapse: collapse;'><tbody>";
             html = html + "<tr>";
@@ -443,18 +402,18 @@ namespace ChartsGenerator
                 {
                     var etask = data;
                     var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
-                    html = html + "<td style='border-top: none !important;'><span style='display:inline-block;white-space: nowrap;' title='" + etask +
+                    html = html + "<td style='border-top: none !important;padding-right:25px;'><span style='display:inline-block;white-space: nowrap;text-overflow: ellipsis;' title='" + etask +
                            "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
-                           "' /></svg> " + etask + "&nbsp;&nbsp;</span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                           "' /></svg> " + etask + "&nbsp;&nbsp;</span> </td>";
                     i = i + 1;
                 }
                 else
                 {
                     var etask = data;
                     var color = _colorData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
-                    html = html + "<td style='border-top: none !important;'><span style='display:inline-block;white-space: nowrap;' title='" + etask +
+                    html = html + "<td style='border-top: none !important;padding-right:25px;'><span style='display:inline-block;white-space: nowrap;text-overflow: ellipsis;' title='" + etask +
                            "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
-                           "' /></svg> " + etask + "&nbsp;&nbsp;</span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
+                           "' /></svg> " + etask + "&nbsp;&nbsp;</span> </td>";
 
                     html = html + "</tr><tr>";
                     i = 1;
@@ -471,45 +430,7 @@ namespace ChartsGenerator
             }
             html = html + "</tr></tbody>";
             html = html + "</table>";
-            //}
-            //else
-            //{
-            //    var selectedval = val.Split(',');
-            //    var newdata = _colorData.Where(x => !selectedval.Contains(x.Task)).Select(x => x.Task).Distinct();
-            //    html = html + "<table>";
-            //    html = html + "<tr>";
-            //    i = 1;
-            //    foreach (var data in newdata)
-            //    {
-            //        if (i <= 6)
-            //        {
-            //            var etask = data;
-            //            var color = tempData.Where(x => x.Task == etask).Select(x => x.Color).FirstOrDefault();
-            //            html = html + "<td><span style='display:inline-block;' title='" + etask +
-            //                   "'><svg width='15' height='15'><rect  width='15' height='15' style='fill:" + color +
-            //                   "' /></svg> " + etask + " </span> <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>";
-            //            i = i + 1;
-            //        }
-            //        else
-            //        {
-            //            html = html + "</tr><tr>";
-            //            i = 1;
-            //        }
-
-            //    }
-
-            //    if (i < 6)
-            //    {
-            //        for (var j = i; j == 6; j++)
-            //        {
-            //            html = html + "<td></td>";
-            //        }
-            //    }
-            //    html = html + "</tr>";
-            //    html = html + "</table>";
-
-
-            //}
+          
             html = html + "";
             return html;
         }
