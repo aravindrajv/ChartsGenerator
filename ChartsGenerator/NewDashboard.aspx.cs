@@ -262,7 +262,8 @@ namespace ChartsGenerator
             foreach (var i in newdata)
             {
                 j++;
-                var tooltip = string.Format("<span style='width:300px; background-color:yellow;'>&nbsp;&nbsp;<b>{0}</b><br/>&nbsp;&nbsp;{1}&nbsp; to &nbsp;{2}</span>", i.Task, i.StartDate.ToString("MM/dd/yy"), i.EndDate.ToString("MM/dd/yy"));
+                var duration = i.EndDate - i.StartDate;
+                var tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>", i.Task, i.StartDate.ToString("MM/dd/yy"), i.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
                 chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet, i.Color, i.Vendor , tooltip};
             }
             return chartData;
