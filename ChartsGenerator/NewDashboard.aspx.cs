@@ -146,7 +146,7 @@ namespace ChartsGenerator
                     var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
                     var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                    tempData = tempData.Where(x => x.EndDate >= startDate && x.StartDate <= endDate).ToList();
                 }
 
                 if (fleets.Length > 0)
@@ -180,6 +180,9 @@ namespace ChartsGenerator
             vendor = vendor ?? "";
             task = task ?? "";
 
+            var startDate = DateTime.MinValue;
+            var endDate = DateTime.MinValue;
+
             var fleets = fleet.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             var phases = phase.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             var vendors = vendor.Replace("null", "").Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -195,10 +198,10 @@ namespace ChartsGenerator
                 tempData = _chartData;
                 if (!string.IsNullOrWhiteSpace(sDate) && !string.IsNullOrWhiteSpace(eDate))
                 {
-                    var startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
-                    var endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                    startDate = DateTime.ParseExact(sDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                    endDate = DateTime.ParseExact(eDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-                    tempData = tempData.Where(x => x.StartDate >= startDate && x.EndDate <= endDate).ToList();
+                    tempData = tempData.Where(x => x.EndDate >= startDate && x.StartDate <= endDate).ToList();
                 }
 
                 if (fleets.Length > 0)
@@ -217,6 +220,9 @@ namespace ChartsGenerator
             // 
             var date = tempData.OrderBy(x => x.StartDate).Select(x => x.StartDate).Distinct().FirstOrDefault();
 
+            if (date < startDate)
+                date = startDate;
+
             var newdata = new List<ChartData>();
 
             var maxLength = tempData.Select(x => x.Phase).Distinct().ToList().Select(x => x.Length).Concat(new[] { 0 }).Max();
@@ -232,8 +238,8 @@ namespace ChartsGenerator
 
                 newdata.Add(new ChartData()
                 {
-                    StartDate = date,
-                    EndDate = date.AddHours(4),
+                    StartDate = date.AddDays(-1),
+                    EndDate = date.AddDays(-1).AddHours(4),
                     Phase = project + sb + "....",
                     Project = project,
                     Task = "",
@@ -261,10 +267,25 @@ namespace ChartsGenerator
                 };
             foreach (var i in newdata)
             {
-                j++;
+                var stDate = i.StartDate;
+                var enDate = i.EndDate;
                 var duration = i.EndDate - i.StartDate;
-                var tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>", i.Task, i.StartDate.ToString("MM/dd/yy"), i.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
-                chartData[j] = new object[] { i.Project, i.Phase, i.Task, i.StartDate, i.EndDate, i.Fleet, i.Color, i.Vendor , tooltip};
+                var tooltip = "";
+                if (stDate.Date != enDate.Date || enDate.Subtract(stDate).Hours > 4)
+                {
+                    if (startDate != DateTime.MinValue && stDate < startDate)
+                        stDate = startDate;
+
+                    if (endDate != DateTime.MinValue && enDate > endDate)
+                        enDate = endDate;
+
+                    tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>", i.Task, i.StartDate.ToString("MM/dd/yy"), i.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+                }
+
+                j++;
+                
+                
+                chartData[j] = new object[] { i.Project, i.Phase, i.Task, stDate, enDate, i.Fleet, i.Color, i.Vendor, tooltip };
             }
             return chartData;
         }
@@ -431,7 +452,7 @@ namespace ChartsGenerator
             }
             html = html + "</tr></tbody>";
             html = html + "</table>";
-          
+
             html = html + "";
             return html;
         }
