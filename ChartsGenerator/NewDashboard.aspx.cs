@@ -265,11 +265,34 @@ namespace ChartsGenerator
                 "Vendor",
                 "Tooltip"
                 };
-            foreach (var i in newdata)
+
+            //foreach (var project in newdata.Select(x => x.Project).Distinct())
+            //{
+            //    var tempPhases = newdata.Where(x => x.Project == project).Select(x => x.Phase).Distinct().ToList();
+            //    foreach (var tempPhase in tempPhases)
+            //    {
+            //        var phase1 = tempPhase;
+            //        var dictDuplicateTasks = newdata.Where(x => x.Project == project && x.Phase == phase1).Select(x => x.Task).GroupBy(x => x)
+            //            .Where(group => group.Count() > 1)
+            //            .ToDictionary(group => group.Key, x => x.ToList());
+            //        foreach (var key in dictDuplicateTasks.Keys)
+            //        {
+            //            var duplicateTasks = newdata.Where(x => x.Project == project && x.Phase == phase1 && x.Task == key).ToList();
+            //            for (var i = 0; i < duplicateTasks.Count; i++)
+            //            {
+            //                if (i == 0)
+            //                    continue;
+            //                duplicateTasks[i].Task = duplicateTasks[i].Task + new string('*', i);
+            //            }
+            //        }
+            //    }
+            //}
+
+            foreach (var data in newdata)
             {
-                var stDate = i.StartDate;
-                var enDate = i.EndDate;
-                var duration = i.EndDate - i.StartDate;
+                var stDate = data.StartDate;
+                var enDate = data.EndDate;
+                var duration = data.EndDate - data.StartDate;
                 var tooltip = "";
                 if (stDate.Date != enDate.Date || enDate.Subtract(stDate).Hours > 4)
                 {
@@ -279,13 +302,15 @@ namespace ChartsGenerator
                     if (endDate != DateTime.MinValue && enDate > endDate)
                         enDate = endDate;
 
-                    tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>", i.Task, i.StartDate.ToString("MM/dd/yy"), i.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+                    tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                        data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+
                 }
 
                 j++;
-                
-                
-                chartData[j] = new object[] { i.Project, i.Phase, i.Task, stDate, enDate, i.Fleet, i.Color, i.Vendor, tooltip };
+
+
+                chartData[j] = new object[] { data.Project, data.Phase, data.Task, stDate, enDate, data.Fleet, data.Color, data.Vendor, tooltip };
             }
             return chartData;
         }
