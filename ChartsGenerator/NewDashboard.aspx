@@ -215,6 +215,7 @@
                     var eyear = eDate.getFullYear();
                     var emonth = eDate.getMonth();
                     var eday = eDate.getDate();
+                    //alert(sDate + ", " + eDate + ", " + val[1] + ", " + val[2] + ", " + val[6]);
                     dataTable.addRows([[val[5] + ' ' + val[1], val[2], val[8], new Date(syear, smonth, sday), new Date(eyear, emonth, eday)]]);
                     if (first) {
                         colors = val[6];

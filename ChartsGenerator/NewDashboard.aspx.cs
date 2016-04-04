@@ -287,7 +287,7 @@ namespace ChartsGenerator
             //        }
             //    }
             //}
-
+            var k = 1;
             foreach (var data in newdata)
             {
                 var stDate = data.StartDate;
@@ -310,7 +310,8 @@ namespace ChartsGenerator
                 j++;
 
 
-                chartData[j] = new object[] { data.Project, data.Phase, data.Task, stDate, enDate, data.Fleet, data.Color, data.Vendor, tooltip };
+                chartData[j] = new object[] { data.Project, data.Phase, data.Task + " " + k.ToString("D2"), stDate, enDate, data.Fleet, data.Color, data.Vendor, tooltip };
+                k++;
             }
             return chartData;
         }
