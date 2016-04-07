@@ -230,7 +230,10 @@ namespace ChartsGenerator
             for (var i = 0; i < maxLength; i++)
                 sb.Append("..");
 
-            foreach (var project in tempData.Select(x => x.Project).Distinct().ToList())
+
+            var temp = tempData.Select(x => x.Project).Distinct().ToList();
+            
+            foreach (var project in temp)
             {
                 var projectData = tempData.Where(x => x.Project == project).ToList();
                 if (projectData.Count <= 0)
@@ -250,7 +253,8 @@ namespace ChartsGenerator
                 newdata.AddRange(projectData);
             }
 
-            int j = 0;
+
+            var j = 0;
 
 
             var chartData = new object[newdata.Count + 1];
@@ -266,27 +270,22 @@ namespace ChartsGenerator
                 "Tooltip"
                 };
 
-            //foreach (var project in newdata.Select(x => x.Project).Distinct())
+
+            var gData = (newdata.GroupBy(x => new { x.Phase, x.StartDate, x.EndDate }).Where(x => x.Count() > 1).ToList());
+            var toolTipdict = new Dictionary<string, string>();
+
+            //foreach (var data in gData)
             //{
-            //    var tempPhases = newdata.Where(x => x.Project == project).Select(x => x.Phase).Distinct().ToList();
-            //    foreach (var tempPhase in tempPhases)
-            //    {
-            //        var phase1 = tempPhase;
-            //        var dictDuplicateTasks = newdata.Where(x => x.Project == project && x.Phase == phase1).Select(x => x.Task).GroupBy(x => x)
-            //            .Where(group => group.Count() > 1)
-            //            .ToDictionary(group => group.Key, x => x.ToList());
-            //        foreach (var key in dictDuplicateTasks.Keys)
-            //        {
-            //            var duplicateTasks = newdata.Where(x => x.Project == project && x.Phase == phase1 && x.Task == key).ToList();
-            //            for (var i = 0; i < duplicateTasks.Count; i++)
-            //            {
-            //                if (i == 0)
-            //                    continue;
-            //                duplicateTasks[i].Task = duplicateTasks[i].Task + new string('*', i);
-            //            }
-            //        }
-            //    }
+            //    //var value = data[];
+            //    var sDateValue = data.StartDate.ToString("yyyyMMdd");
+            //    var eDateValue = data.EndDate.ToString("yyyyMMdd");
+            //    var phaseValue = data.Phase;
+            //    var keyValue = phaseValue + sDateValue + eDateValue;
+
+            //    var tasks = newdata.Where(x=>x.StartDate == )
+            //    toolTipdict.Add("Key", keyValue);
             //}
+
             var k = 1;
             foreach (var data in newdata)
             {
