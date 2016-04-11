@@ -217,7 +217,7 @@ namespace ChartsGenerator
                     tempData = tempData.Where(x => !tasks.Contains(x.Task)).ToList();
             }
 
-            // 
+            
             var date = tempData.OrderBy(x => x.StartDate).Select(x => x.StartDate).Distinct().FirstOrDefault();
 
             if (date < startDate)
@@ -232,7 +232,7 @@ namespace ChartsGenerator
 
 
             var temp = tempData.Select(x => x.Project).Distinct().ToList();
-            
+
             foreach (var project in temp)
             {
                 var projectData = tempData.Where(x => x.Project == project).ToList();
@@ -270,21 +270,54 @@ namespace ChartsGenerator
                 "Tooltip"
                 };
 
+            var chartKeyValues = new List<ChartKeyValue>();
+            foreach (var data in newdata)
+            {
+                if (data.StartDate.Date != data.EndDate.Date || data.EndDate.Subtract(data.StartDate).Hours > 4)
+                {
+                    var sDateValue = data.StartDate.ToString("yyyyMMdd");
+                    var eDateValue = data.EndDate.ToString("yyyyMMdd");
+                    var phaseValue = data.Phase;
+                    var projectValue = data.Project;
+                    var key = projectValue + phaseValue + sDateValue + eDateValue;
+                    var chartKeyValue = new ChartKeyValue()
+                    {
+                        ChartData = data,
+                        Key = key
+                    };
+                    chartKeyValues.Add(chartKeyValue);
+                }
+            }
 
-            var gData = (newdata.GroupBy(x => new { x.Phase, x.StartDate, x.EndDate }).Where(x => x.Count() > 1).ToList());
+            var dictChartKeyValues = chartKeyValues.GroupBy(x =>  x.Key).ToDictionary(x=>x.Key, x=>x.ToList());
             var toolTipdict = new Dictionary<string, string>();
 
-            //foreach (var data in gData)
-            //{
-            //    //var value = data[];
-            //    var sDateValue = data.StartDate.ToString("yyyyMMdd");
-            //    var eDateValue = data.EndDate.ToString("yyyyMMdd");
-            //    var phaseValue = data.Phase;
-            //    var keyValue = phaseValue + sDateValue + eDateValue;
-
-            //    var tasks = newdata.Where(x=>x.StartDate == )
-            //    toolTipdict.Add("Key", keyValue);
-            //}
+            foreach (var key in dictChartKeyValues.Keys)
+            {
+                var charts = dictChartKeyValues[key];
+                if (charts.Count==1)
+                {
+                    var data = charts[0].ChartData;
+                    var duration = data.EndDate - data.StartDate;
+                    var tooltip = string.Format("<span style='BORDER-RIGHT: blue 1px solid;BORDER-TOP: blue 1px solid;BORDER-LEFT: blue 1px solid;BORDER-BOTTOM: blue 1px solid;width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                        data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+                    toolTipdict.Add(key, tooltip);
+                }
+                else
+                {
+                    var tempChartKeyValues = dictChartKeyValues[key];
+                    var toolTips = "";
+                    foreach (var tempChartKeyValue in tempChartKeyValues)
+                    {
+                        var data = tempChartKeyValue.ChartData;
+                        var duration = data.EndDate - data.StartDate;
+                        var tooltip = string.Format("<span style='BORDER-RIGHT: blue 1px solid;BORDER-TOP: blue 1px solid;BORDER-LEFT: blue 1px solid;BORDER-BOTTOM: blue 1px solid;width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                            data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+                        toolTips = toolTips + tooltip;
+                    }
+                    toolTipdict.Add(key, toolTips);
+                }
+            }
 
             var k = 1;
             foreach (var data in newdata)
@@ -302,13 +335,21 @@ namespace ChartsGenerator
                         enDate = endDate;
 
                     tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
-                        data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+                            data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
 
+                    var sDateValue = data.StartDate.ToString("yyyyMMdd");
+                    var eDateValue = data.EndDate.ToString("yyyyMMdd");
+                    var phaseValue = data.Phase;
+                    var projectValue = data.Project;
+                    var key = projectValue + phaseValue + sDateValue + eDateValue;
+                    if (toolTipdict.ContainsKey(key))
+                        tooltip = toolTipdict[key];
+                    else
+                        tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style='border-style: inset;  color: #fff; background-color: #fff;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                                    data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
                 }
 
                 j++;
-
-
                 chartData[j] = new object[] { data.Project, data.Phase, data.Task + " " + k.ToString("D2"), stDate, enDate, data.Fleet, data.Color, data.Vendor, tooltip };
                 k++;
             }
@@ -481,5 +522,11 @@ namespace ChartsGenerator
             html = html + "";
             return html;
         }
+    }
+
+    public class ChartKeyValue
+    {
+        public string Key { get; set; }
+        public ChartData ChartData { get; set; }
     }
 }
