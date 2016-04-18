@@ -298,10 +298,11 @@ namespace ChartsGenerator
                 if (charts.Count==1)
                 {
                     var data = charts[0].ChartData;
-                    var duration = data.EndDate - data.StartDate;
-                    var tooltip = string.Format("<span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><hr style=' border: 1px solid green;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
-                        data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
-                    toolTipdict.Add(key, tooltip);
+                        var colorCode = data.Color;
+                        var duration = data.EndDate - data.StartDate;
+                        var tooltip = string.Format("<span style='width:300px; white-space: nowrap;'><br/>&nbsp;<font style='background-color:" + colorCode + ";'>&nbsp;&nbsp;</font>&nbsp;&nbsp;<b>{0}</b><br/><hr style=' border: 1px solid " + colorCode + ";' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                            data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+                        toolTipdict.Add(key, tooltip);
                 }
                 else
                 {
@@ -312,8 +313,9 @@ namespace ChartsGenerator
                     {
                         var color = n == 0 ? "green" : "blue";
                         var data = tempChartKeyValue.ChartData;
+                        var colorCode = data.Color;
                         var duration = data.EndDate - data.StartDate;
-                        var tooltip = string.Format("<span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><hr  style='border: 1px solid " + color + ";' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                        var tooltip = string.Format("<span style='width:300px; white-space: nowrap;'><br/>&nbsp;<span style='background-color:" + colorCode + ";'>&nbsp;&nbsp;</span>&nbsp;&nbsp;<b>{0}</b><br/><hr  style='border: 1px solid " + colorCode + ";' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
                             data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
                         toolTips = toolTips + tooltip;
                         n = 1;
@@ -321,6 +323,8 @@ namespace ChartsGenerator
                     toolTipdict.Add(key, toolTips);
                 }
             }
+
+            var dictIsTaskAdded = new Dictionary<string, bool>();
 
             var k = 1;
             foreach (var data in newdata)
@@ -337,18 +341,25 @@ namespace ChartsGenerator
                     if (endDate != DateTime.MinValue && enDate > endDate)
                         enDate = endDate;
 
-                    tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr  />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
-                            data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
+//                    tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr  />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+//                            data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
 
                     var sDateValue = data.StartDate.ToString("yyyyMMdd");
                     var eDateValue = data.EndDate.ToString("yyyyMMdd");
                     var phaseValue = data.Phase;
                     var projectValue = data.Project;
+                    var colorCode = data.Color;
                     var key = projectValue + phaseValue + sDateValue + eDateValue;
+
+                    if(dictIsTaskAdded.ContainsKey(key))
+                        continue;
+
+                    dictIsTaskAdded.Add(key, true);
+
                     if (toolTipdict.ContainsKey(key))
                         tooltip = toolTipdict[key];
                     else
-                        tooltip = string.Format("<div ><span style='width:300px; white-space: nowrap;'><br/>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style=' border-top: 1px solid #ccc;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
+                        tooltip = string.Format("<span style='width:300px; white-space: nowrap;'><br/>&nbsp;<span style='background-color:" + colorCode + ";'>&nbsp;&nbsp;</span>&nbsp;&nbsp;<b>{0}</b><br/><br/><hr style=' border-top: 1px solid #ccc;' />&nbsp;&nbsp;<b>Date Range : </b>{1}&nbsp; to &nbsp;{2}&nbsp;&nbsp;<br/>&nbsp;&nbsp;<b>Duration : </b>{3}&nbsp;&nbsp;<br /><br/></span>",
                                     data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
                 }
 
