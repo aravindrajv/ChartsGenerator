@@ -253,12 +253,8 @@ namespace ChartsGenerator
                 newdata.AddRange(projectData);
             }
 
-
-            var j = 0;
-
-
-            var chartData = new object[newdata.Count + 1];
-            chartData[0] = new object[]{
+            var chartData = new List<object>();
+            chartData.Add(new object[]{
                 "Project",    
                 "Phase",
                 "Task",
@@ -268,7 +264,7 @@ namespace ChartsGenerator
                 "Color",
                 "Vendor",
                 "Tooltip"
-                };
+                });
 
             var chartKeyValues = new List<ChartKeyValue>();
             foreach (var data in newdata)
@@ -351,7 +347,7 @@ namespace ChartsGenerator
                     var colorCode = data.Color;
                     var key = projectValue + phaseValue + sDateValue + eDateValue;
 
-                    if(dictIsTaskAdded.ContainsKey(key))
+                    if (dictIsTaskAdded.ContainsKey(key))
                         continue;
 
                     dictIsTaskAdded.Add(key, true);
@@ -363,11 +359,11 @@ namespace ChartsGenerator
                                     data.Task, data.StartDate.ToString("MM/dd/yy"), data.EndDate.ToString("MM/dd/yy"), duration.ToString("dd") + " days");
                 }
 
-                j++;
-                chartData[j] = new object[] { data.Project, data.Phase, data.Task + " " + k.ToString("D2"), stDate, enDate, data.Fleet, data.Color, data.Vendor, tooltip };
+                
+                chartData.Add(new object[] { data.Project, data.Phase, data.Task + " " + k.ToString("D2"), stDate, enDate, data.Fleet, data.Color, data.Vendor, tooltip });
                 k++;
             }
-            return chartData;
+            return chartData.ToArray();
         }
 
         protected void FleetSelected(object sender, EventArgs e)

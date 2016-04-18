@@ -102,14 +102,10 @@
     <Content Include="fonts\fontawesome-webfont.ttf" />
     <Content Include="fonts\fontawesome-webfont.eot" />
     <Content Include="fonts\FontAwesome.otf" />
-    <Content Include="sample\template.xlsx" />
     <None Include="Properties\PublishProfiles\AWS.pubxml" />
     <None Include="Properties\PublishProfiles\charts.pubxml" />
     <None Include="Properties\PublishProfiles\ChartsGenerator.pubxml" />
     <None Include="Properties\PublishProfiles\Dashboard.pubxml" />
-    <Content Include="sample\template2.xlsx" />
-    <Content Include="sample\template4.xlsx" />
-    <Content Include="sample\sampletemplateold.xlsx" />
     <Content Include="sample\sampletemplate.xlsx" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\bootstrap-datepicker.js" />
